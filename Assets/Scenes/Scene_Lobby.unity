@@ -156,7 +156,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -168,15 +168,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ReadyUp
+      value: ReadyButtonPressed
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: LobbyMenu, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
+      value: 
+      objectReference: {fileID: 126484497}
+    - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
+      value: UnityEngine.UI.Button, UnityEngine.UI
       objectReference: {fileID: 0}
     - target: {fileID: 6891841257080532574, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Color.b
@@ -422,9 +426,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e18dcbb920e99a40b121951eb838555, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerPanelContainer: {fileID: 808678385}
+  playerInviteWindow: {fileID: 1079975763}
+  playerInviteContainer: {fileID: 1131717745}
+  invitableFriendPrefab: {fileID: 4384775707012272225, guid: f889da3d912b7954badd07fe21fa8191, type: 3}
   startGameButton: {fileID: 4422844352733028602}
-  readyButton: {fileID: 126484497}
-  lobbyPlayerParent: {fileID: 808678385}
 --- !u!224 &314181349 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8535967926743000227, guid: 0b32fb6199c99aa43b26e947b07214a3, type: 3}
@@ -734,7 +740,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4384775707012272225, guid: f889da3d912b7954badd07fe21fa8191, type: 3}
       propertyPath: m_Name
-      value: InviteableFriend
+      value: InvitableFriend
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f889da3d912b7954badd07fe21fa8191, type: 3}
@@ -772,7 +778,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: LeaveLobby
+      value: LeaveLobbyPressed
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -1097,6 +1103,11 @@ PrefabInstance:
 --- !u!224 &1079975762 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8315743387706695097, guid: 03a4a53e296751444925f5db74e762cf, type: 3}
+  m_PrefabInstance: {fileID: 1079975761}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1079975763 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8315743387706695096, guid: 03a4a53e296751444925f5db74e762cf, type: 3}
   m_PrefabInstance: {fileID: 1079975761}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1131717744
@@ -1779,7 +1790,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: StartGame
+      value: StartButtonPressed
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName

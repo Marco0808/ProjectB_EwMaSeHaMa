@@ -17,6 +17,16 @@ public class NetworkManagerHousework : NetworkManager
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
     [SerializeField] private GameObject playerSpawnSystem;
 
+    public static NetworkManagerHousework _singleton;
+    public static NetworkManagerHousework Singleton
+    {
+        get
+        {
+            if (_singleton != null) return _singleton;
+            return _singleton = NetworkManager.singleton as NetworkManagerHousework;
+        }
+    }
+
     public static event Action OnClientConnected;
     public static event Action OnClientDisconnected;
     public static event Action<NetworkConnection> OnServerReadied;
@@ -74,16 +84,12 @@ public class NetworkManagerHousework : NetworkManager
         // If inside lobby, spawn and assign LobbyPlayer for new client
         if (SceneManager.GetActiveScene().name == lobbyScene)
         {
-            bool isLeader = LobbyPlayers.Count == 0;
-
             NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab);
-
-            lobbyPlayer.IsLeader = isLeader;
+            lobbyPlayer.Initialize(this, LobbyPlayers.Count == 0);
 
             NetworkServer.AddPlayerForConnection(conn, lobbyPlayer.gameObject);
         }
-
-        base.OnServerAddPlayer(conn);
+        else base.OnServerAddPlayer(conn);
     }
 
     public override void OnServerDisconnect(NetworkConnection conn)
@@ -92,7 +98,7 @@ public class NetworkManagerHousework : NetworkManager
         {
             NetworkLobbyPlayer player = conn.identity.GetComponent<NetworkLobbyPlayer>();
             LobbyPlayers.Remove(player);
-            NotifyPlayersOfReadyState();
+            PlayerChangedReadyState();
         }
 
         base.OnServerDisconnect(conn);
@@ -123,7 +129,7 @@ public class NetworkManagerHousework : NetworkManager
             {
                 NetworkConnection conn = LobbyPlayers[i].connectionToClient;
                 NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
-                gamePlayer.SetDisplayName(LobbyPlayers[i].displayName);
+                gamePlayer.SetDisplayName(LobbyPlayers[i].DisplayName);
 
                 NetworkServer.Destroy(conn.identity.gameObject);
                 NetworkServer.ReplacePlayerForConnection(conn, gamePlayer.gameObject);
@@ -142,16 +148,13 @@ public class NetworkManagerHousework : NetworkManager
         }
     }
 
-    public void NotifyPlayersOfReadyState()
+    public void PlayerChangedReadyState()
     {
-        foreach (NetworkLobbyPlayer player in LobbyPlayers)
-            player.HandleReadyToStart(IsReadyToStart());
+        LobbyPlayers[0].StartGameButton.interactable = IsReadyToStart();
     }
 
     private bool IsReadyToStart()
     {
-        return true; //TODO remove fake isReady
-
         if (numPlayers < minPlayers)
             return false;
 

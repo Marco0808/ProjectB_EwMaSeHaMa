@@ -6,36 +6,44 @@ using Mirror;
 
 public class LobbyMenu : MonoBehaviour
 {
+    [SerializeField] private Transform playerPanelContainer;
+    [SerializeField] private GameObject playerInviteWindow;
+    [SerializeField] private Transform playerInviteContainer;
+    [SerializeField] private GameObject invitableFriendPrefab;
     [SerializeField] private Button startGameButton;
-    [SerializeField] private Button readyButton;
-    [SerializeField] private RectTransform lobbyPlayerParent;
 
-    public static Button StartGameButton { get; private set; }
-    public static Button ReadyButton { get; private set; }
-    public static RectTransform LobbyPlayerParent { get; private set; }
+    public static event Action OnStartButtonPressed;
+    public static event Action<GameObject> OnReadyButtonPressed;
+    public static event Action OnLeaveLobbyButtonPressed;
 
-    public static event Action OnStartGameButtonPressed;
-    public static event Action OnReadyButtonPressed;
 
-    private void Awake()
+    public Transform PlayerPanelContainer => playerPanelContainer;
+    public GameObject PlayerInviteWindow => playerInviteWindow;
+    public Button StartGameButton => startGameButton;
+
+
+    public void StartButtonPressed()
     {
-        StartGameButton = startGameButton;
-        ReadyButton = readyButton;
-        LobbyPlayerParent = lobbyPlayerParent;
+        OnStartButtonPressed?.Invoke();
     }
 
-    public void ReadyUp()
+    public void ReadyButtonPressed(Button readyButton)
     {
-        OnReadyButtonPressed?.Invoke();
+        OnReadyButtonPressed?.Invoke(readyButton.gameObject);
     }
 
-    public void StartGame()
+    public void LeaveLobbyPressed()
     {
-        OnStartGameButtonPressed?.Invoke();
+        OnLeaveLobbyButtonPressed?.Invoke();
     }
 
-    public void LeaveLobby()
+    public void PoppulateInvitableFriends()
     {
-        NetworkClient.Disconnect();
+        //TODO
+    }
+
+    public void InviteFriend()
+    {
+        //TODO
     }
 }
