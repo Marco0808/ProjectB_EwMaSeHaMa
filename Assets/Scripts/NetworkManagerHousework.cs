@@ -17,7 +17,7 @@ public class NetworkManagerHousework : NetworkManager
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
     [SerializeField] private GameObject playerSpawnSystem;
 
-    public static NetworkManagerHousework _singleton;
+    private static NetworkManagerHousework _singleton;
     public static NetworkManagerHousework Singleton
     {
         get
@@ -33,11 +33,17 @@ public class NetworkManagerHousework : NetworkManager
 
     public List<NetworkLobbyPlayer> LobbyPlayers { get; } = new List<NetworkLobbyPlayer>();
     public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
+    public bool IsGameInProgress { get; private set; }
+
+    /// <summary>Be careful with setting transports, this is only meant to be used for development.</summary>
+    public Transport Transport { get => transport; set => transport = value; }
 
     public override void OnStartServer()
     {
-        // Load spawnable prefabs for server
-        spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
+        //TODO Loading spawnables for server needed or not?
+
+        ServerChangeScene(lobbyScene);
+        IsGameInProgress = false;
     }
 
     public override void OnStartClient()
@@ -71,8 +77,8 @@ public class NetworkManagerHousework : NetworkManager
             return;
         }
 
-        // Disconnect new client if game is already in progress
-        if (SceneManager.GetActiveScene().name != lobbyScene)
+        //TODO Disconnect new client if game is already in progress
+        if (IsGameInProgress)
         {
             conn.Disconnect();
             return;
@@ -82,14 +88,13 @@ public class NetworkManagerHousework : NetworkManager
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
         // If inside lobby, spawn and assign LobbyPlayer for new client
-        if (SceneManager.GetActiveScene().name == lobbyScene)
+        if (!IsGameInProgress)
         {
-            NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab);
-            lobbyPlayer.Initialize(this, LobbyPlayers.Count == 0);
-
+            NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab, FindObjectOfType<LobbyMenu>().transform);
+            lobbyPlayer.gameObject.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
+            Debug.Log(lobbyPlayer.gameObject.name);
             NetworkServer.AddPlayerForConnection(conn, lobbyPlayer.gameObject);
         }
-        else base.OnServerAddPlayer(conn);
     }
 
     public override void OnServerDisconnect(NetworkConnection conn)
@@ -150,7 +155,9 @@ public class NetworkManagerHousework : NetworkManager
 
     public void PlayerChangedReadyState()
     {
-        LobbyPlayers[0].StartGameButton.interactable = IsReadyToStart();
+        // check if everyone is ready and set the start game button accordingly
+        if (LobbyPlayers.Count > 0)
+            LobbyPlayers[0].StartGameButton.interactable = IsReadyToStart();
     }
 
     private bool IsReadyToStart()
@@ -159,7 +166,7 @@ public class NetworkManagerHousework : NetworkManager
             return false;
 
         foreach (NetworkLobbyPlayer player in LobbyPlayers)
-            if (!player.isReady)
+            if (!player.IsReady)
                 return false;
 
         return true;
@@ -172,9 +179,12 @@ public class NetworkManagerHousework : NetworkManager
 
     public void StartGame()
     {
-        if (SceneManager.GetActiveScene().name == lobbyScene)
-            if (IsReadyToStart())
-                ServerChangeScene(gameScene);
-            else return;
+        if (!IsGameInProgress && IsReadyToStart())
+        {
+            Debug.Log("Starting game".Color("cyan"));
+            ServerChangeScene(gameScene);
+            IsGameInProgress = true;
+        }
+        else return;
     }
 }

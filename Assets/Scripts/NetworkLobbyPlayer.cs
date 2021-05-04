@@ -8,101 +8,96 @@ using TMPro;
 
 public class NetworkLobbyPlayer : NetworkBehaviour
 {
-    [SerializeField] private GameObject characterSelectionPrefab;
-    [SerializeField] private LobbyPlayerPanel playerPanel;
+    [SerializeField] private TMP_Text displayNameText;
+    [SerializeField] private GameObject leaderIcon;
 
-    [SyncVar] public bool isReady;
+    [Header("Character Selection")]
+    [SerializeField] private Button characterSelectionButton;
+    [SerializeField] private Image characterPortrait;
+    [SerializeField] private GameObject characterSelectionPrefab;
+
+    [SyncVar] private bool _isReady;
+    [SyncVar] private bool _isLeader;
 
     private LobbyMenu _lobbyMenu;
-    private bool _isLeader;
 
     public string DisplayName { get; private set; }
+    public bool IsReady => _isReady;
     public Button StartGameButton => _lobbyMenu.StartGameButton;
 
 
-    public override void OnStartAuthority()
+    private void Awake()
     {
         _lobbyMenu = FindObjectOfType<LobbyMenu>();
+    }
+
+    private void Start()
+    {
+        transform.SetParent(_lobbyMenu.PlayerPanelContainer);
+        transform.localScale = Vector3.one;
+    }
+
+    public override void OnStartAuthority()
+    {
         LobbyMenu.OnStartButtonPressed += CmdStartGame;
-        LobbyMenu.OnReadyButtonPressed += CmdToggleReady;
+        LobbyMenu.OnReadyButtonPressed += ToggleReadyState;
         LobbyMenu.OnLeaveLobbyButtonPressed += LeaveLobby;
 
+        // Setup lobby UI according to player status
+        CmdCheckIfLeader(NetworkServer.active && NetworkClient.isConnected);
         CmdSetDisplayName(SteamManager.Initialized ? SteamFriends.GetPersonaName() : "Foo");
-        //CmdSetCharacterSelctionButtonInteractable(true);
-    }
-
-    [Server]
-    public void Initialize(NetworkManagerHousework networkManager, bool isLeader)
-    {
-        _isLeader = isLeader;
-
-        if (isLeader) RpcShowLeaderUI(connectionToClient);
-
-        RpcSetCharacterSelectionButtonInteractable(connectionToClient, true);
-        RpcSetPlayerPanelParent();
-    }
-
-    [ClientRpc]
-    private void RpcSetPlayerPanelParent()
-    {
-        playerPanel.transform.parent = _lobbyMenu.PlayerPanelContainer;
+        CmdSetReadyState(false);
+        characterSelectionButton.interactable = true;
     }
 
     [Command]
-    private void CmdSetCharacterSelctionButtonInteractable(bool interactable)
+    private void CmdCheckIfLeader(bool isHost)
     {
-        RpcSetCharacterSelectionButtonInteractable(connectionToClient, interactable);
+        // Become leader if we are the host
+        _isLeader = isHost;
+
+        RpcShowLeaderUI(connectionToClient, _isLeader);
+        RpcSetLeaderIcon(_isLeader);
     }
 
     [TargetRpc]
-    private void RpcSetCharacterSelectionButtonInteractable(NetworkConnection target, bool interactable)
+    private void RpcShowLeaderUI(NetworkConnection target, bool isLeader)
     {
-        playerPanel.CharacterSelectionBtton.interactable = interactable;
-    }
-
-    [TargetRpc]
-    private void RpcShowLeaderUI(NetworkConnection target)
-    {
-        _lobbyMenu.StartGameButton.gameObject.SetActive(true);
-        _lobbyMenu.PlayerInviteWindow.SetActive(true);
+        _lobbyMenu.StartGameButton.gameObject.SetActive(isLeader);
+        _lobbyMenu.PlayerInviteWindow.SetActive(isLeader);
     }
 
     [ClientRpc]
-    private void SetLeaderIcon(bool isLeader)
+    private void RpcSetLeaderIcon(bool isLeader)
     {
-        playerPanel.LeaderIcon.SetActive(isLeader);
+        leaderIcon.SetActive(isLeader);
+    }
+
+    private void ToggleReadyState()
+    {
+        CmdSetReadyState(!_isReady);
     }
 
     [Command]
-    private void CmdToggleReady(GameObject readyButton)
+    private void CmdSetReadyState(bool isReady)
     {
-        isReady = !isReady;
+        _isReady = isReady;
 
-        readyButton.GetComponent<Button>().image.color = isReady ? Color.green : Color.yellow;
-        RpcSetReady(isReady);
+        RpcSetReadyButtonState(connectionToClient, _isReady);
+        RpcSetPlayerPanelReady(_isReady);
         NetworkManagerHousework.Singleton.PlayerChangedReadyState();
     }
 
+    [TargetRpc]
+    private void RpcSetReadyButtonState(NetworkConnection target, bool isReady)
+    {
+        _lobbyMenu.SetReadyButtonState(isReady);
+    }
+
     [ClientRpc]
-    private void RpcSetReady(bool isReady)
+    private void RpcSetPlayerPanelReady(bool isready)
     {
-        playerPanel.DisplayNameText.color = isReady ? Color.green : Color.green;
-    }
-
-    public void LeaveLobby()
-    {
-        // connectionToClient.Disconnect();
-        NetworkClient.Disconnect();
-    }
-
-    public override void OnStartClient()
-    {
-        NetworkManagerHousework.Singleton.LobbyPlayers.Add(this);
-    }
-
-    public override void OnStopClient()
-    {
-        NetworkManagerHousework.Singleton.LobbyPlayers.Remove(this);
+        displayNameText.color = _isReady ? Color.green : Color.yellow;
     }
 
     [Command]
@@ -116,16 +111,39 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcSetDisplayName(string displayName)
     {
-        playerPanel.DisplayNameText.text = displayName;
+        displayNameText.text = displayName;
     }
 
     [Command]
     public void CmdStartGame()
     {
-        Debug.Log("Trying to start game".Color("cyan"));
-        // Check if we are the leader
-        if (NetworkManagerHousework.Singleton.LobbyPlayers[0].connectionToClient == connectionToClient)
-            NetworkManagerHousework.Singleton.StartGame();
+        if (_isLeader) NetworkManagerHousework.Singleton.StartGame();
+    }
+
+    public void LeaveLobby()
+    {
+        // stop host if is host
+        if (NetworkServer.active && NetworkClient.isConnected)
+            NetworkManagerHousework.Singleton.StopHost();
+
+        // stop client if client-only
+        if (NetworkClient.isConnected)
+            NetworkManagerHousework.Singleton.StopClient();
+    }
+
+    public override void OnStartClient()
+    {
+        NetworkManagerHousework.Singleton.LobbyPlayers.Add(this);
+    }
+
+    public override void OnStopClient()
+    {
+        NetworkManagerHousework.Singleton.LobbyPlayers.Remove(this);
+    }
+
+    public void ToggleCharacterSelection()
+    {
+        //TODO character selection
     }
 
     /* public void ShowCharacterSelection()

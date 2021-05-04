@@ -2,22 +2,24 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Mirror;
+using TMPro;
 
 public class LobbyMenu : MonoBehaviour
 {
-    [SerializeField] private Transform playerPanelContainer;
+    [SerializeField] private RectTransform playerPanelContainer;
     [SerializeField] private GameObject playerInviteWindow;
     [SerializeField] private Transform playerInviteContainer;
     [SerializeField] private GameObject invitableFriendPrefab;
     [SerializeField] private Button startGameButton;
+    [SerializeField] private Button readyButton;
+    [SerializeField] private TMP_Text readyButtonText;
 
     public static event Action OnStartButtonPressed;
-    public static event Action<GameObject> OnReadyButtonPressed;
+    public static event Action OnReadyButtonPressed;
     public static event Action OnLeaveLobbyButtonPressed;
 
 
-    public Transform PlayerPanelContainer => playerPanelContainer;
+    public RectTransform PlayerPanelContainer => playerPanelContainer;
     public GameObject PlayerInviteWindow => playerInviteWindow;
     public Button StartGameButton => startGameButton;
 
@@ -27,9 +29,15 @@ public class LobbyMenu : MonoBehaviour
         OnStartButtonPressed?.Invoke();
     }
 
-    public void ReadyButtonPressed(Button readyButton)
+    public void ReadyButtonPressed()
     {
-        OnReadyButtonPressed?.Invoke(readyButton.gameObject);
+        OnReadyButtonPressed?.Invoke();
+    }
+
+    public void SetReadyButtonState(bool isReady)
+    {
+        readyButton.image.color = isReady ? Color.green : Color.yellow;
+        readyButtonText.text = isReady ? "Ready" : "Ready Up";
     }
 
     public void LeaveLobbyPressed()
