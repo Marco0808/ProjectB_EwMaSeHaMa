@@ -23,7 +23,7 @@ public class NetworkManagerHousework : NetworkManager
         get
         {
             if (_singleton != null) return _singleton;
-            return _singleton = NetworkManager.singleton as NetworkManagerHousework;
+            return _singleton = singleton as NetworkManagerHousework;
         }
     }
 
@@ -31,18 +31,18 @@ public class NetworkManagerHousework : NetworkManager
     public static event Action OnClientDisconnected;
     public static event Action<NetworkConnection> OnServerReadied;
 
-    public List<NetworkLobbyPlayer> LobbyPlayers { get; } = new List<NetworkLobbyPlayer>();
-    public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
-    public bool IsGameInProgress { get; private set; }
+    /// <summary>Dictionary of all lobby players, with connectionId as key</summary>
+    public Dictionary<int, NetworkLobbyPlayer> LobbyPlayers { get; set; } = new Dictionary<int, NetworkLobbyPlayer>();
 
-    /// <summary>Be careful with setting transports, this is only meant to be used for development.</summary>
-    public Transport Transport { get => transport; set => transport = value; }
+    /// <summary>Dictionary of all game players, with connectionId as key</summary>
+    public Dictionary<int, NetworkGamePlayer> GamePlayers => new Dictionary<int, NetworkGamePlayer>();
+    public bool IsGameInProgress { get; private set; }
 
     public override void OnStartServer()
     {
         //TODO Loading spawnables for server needed or not?
+        //spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
 
-        ServerChangeScene(lobbyScene);
         IsGameInProgress = false;
     }
 
@@ -90,9 +90,10 @@ public class NetworkManagerHousework : NetworkManager
         // If inside lobby, spawn and assign LobbyPlayer for new client
         if (!IsGameInProgress)
         {
-            NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab, FindObjectOfType<LobbyMenu>().transform);
+            NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab);
             lobbyPlayer.gameObject.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
-            Debug.Log(lobbyPlayer.gameObject.name);
+            lobbyPlayer.LobbyPlayerPanel.name = $"{playerPrefab.name}Panel [connId={conn.connectionId}]";
+
             NetworkServer.AddPlayerForConnection(conn, lobbyPlayer.gameObject);
         }
     }
@@ -101,8 +102,7 @@ public class NetworkManagerHousework : NetworkManager
     {
         if (conn.identity != null)
         {
-            NetworkLobbyPlayer player = conn.identity.GetComponent<NetworkLobbyPlayer>();
-            LobbyPlayers.Remove(player);
+            LobbyPlayers.Remove(conn.connectionId);
             PlayerChangedReadyState();
         }
 
@@ -121,43 +121,17 @@ public class NetworkManagerHousework : NetworkManager
         OnServerReadied?.Invoke(conn);
     }
 
-    public override void ServerChangeScene(string newSceneName)
-    {
-        base.ServerChangeScene(newSceneName);
-
-        Debug.Log($"Server change scene to {newSceneName}".Color("green"));
-
-        // Change scene from lobby to game
-        if (SceneManager.GetActiveScene().name == lobbyScene && newSceneName == gameScene)
-        {
-            for (int i = LobbyPlayers.Count - 1; i >= 0; i--)
-            {
-                NetworkConnection conn = LobbyPlayers[i].connectionToClient;
-                NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
-                gamePlayer.SetDisplayName(LobbyPlayers[i].DisplayName);
-
-                NetworkServer.Destroy(conn.identity.gameObject);
-                NetworkServer.ReplacePlayerForConnection(conn, gamePlayer.gameObject);
-            }
-        }
-    }
-
     public override void OnServerSceneChanged(string sceneName)
     {
-        Debug.Log("Scene changed".Color("green"));
-
-        if (sceneName == gameScene)
-        {
-            GameObject spawnSystem = Instantiate(playerSpawnSystem);
-            NetworkServer.Spawn(playerSpawnSystem);
-        }
+        Debug.Log($"Server changed scene to {sceneName}".Color("green"));
     }
 
     public void PlayerChangedReadyState()
     {
-        // check if everyone is ready and set the start game button accordingly
-        if (LobbyPlayers.Count > 0)
-            LobbyPlayers[0].StartGameButton.interactable = IsReadyToStart();
+        // check if everyone is ready and set the host's start game button accordingly
+        foreach (var item in LobbyPlayers)
+            if (item.Value.IsLeader)
+                item.Value.StartGameButton.interactable = IsReadyToStart();
     }
 
     private bool IsReadyToStart()
@@ -165,16 +139,11 @@ public class NetworkManagerHousework : NetworkManager
         if (numPlayers < minPlayers)
             return false;
 
-        foreach (NetworkLobbyPlayer player in LobbyPlayers)
-            if (!player.IsReady)
+        foreach (var item in LobbyPlayers)
+            if (!item.Value.IsReady)
                 return false;
 
         return true;
-    }
-
-    public void LoadLobby()
-    {
-        ServerChangeScene(lobbyScene);
     }
 
     public void StartGame()
@@ -182,8 +151,9 @@ public class NetworkManagerHousework : NetworkManager
         if (!IsGameInProgress && IsReadyToStart())
         {
             Debug.Log("Starting game".Color("cyan"));
-            ServerChangeScene(gameScene);
             IsGameInProgress = true;
+
+            ServerChangeScene(gameScene);
         }
         else return;
     }

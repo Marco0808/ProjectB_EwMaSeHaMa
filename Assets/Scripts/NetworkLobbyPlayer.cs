@@ -8,6 +8,7 @@ using TMPro;
 
 public class NetworkLobbyPlayer : NetworkBehaviour
 {
+    [SerializeField] private RectTransform lobbyPlayerPanel;
     [SerializeField] private TMP_Text displayNameText;
     [SerializeField] private GameObject leaderIcon;
 
@@ -16,25 +17,37 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     [SerializeField] private Image characterPortrait;
     [SerializeField] private GameObject characterSelectionPrefab;
 
-    [SyncVar] private bool _isReady;
-    [SyncVar] private bool _isLeader;
+    [SyncVar] private bool sync_isLeader;
+    [SyncVar] private bool sync_isReady;
+
+    [SyncVar(hook = nameof(DisplayNameChanged))]
+    private string sync_displayName;
 
     private LobbyMenu _lobbyMenu;
 
-    public string DisplayName { get; private set; }
-    public bool IsReady => _isReady;
+    public RectTransform LobbyPlayerPanel => lobbyPlayerPanel;
+    public bool IsLeader => sync_isLeader;
+    public bool IsReady => sync_isReady;
+    public string DisplayName => sync_displayName;
     public Button StartGameButton => _lobbyMenu.StartGameButton;
 
 
     private void Awake()
     {
+        DontDestroyOnLoad(gameObject);
+
         _lobbyMenu = FindObjectOfType<LobbyMenu>();
     }
 
     private void Start()
     {
-        transform.SetParent(_lobbyMenu.PlayerPanelContainer);
-        transform.localScale = Vector3.one;
+        lobbyPlayerPanel.SetParent(_lobbyMenu.PlayerPanelContainer);
+        lobbyPlayerPanel.localScale = Vector3.one;
+    }
+
+    private void OnDestroy()
+    {
+        Destroy(lobbyPlayerPanel);
     }
 
     public override void OnStartAuthority()
@@ -43,81 +56,69 @@ public class NetworkLobbyPlayer : NetworkBehaviour
         LobbyMenu.OnReadyButtonPressed += ToggleReadyState;
         LobbyMenu.OnLeaveLobbyButtonPressed += LeaveLobby;
 
-        // Setup lobby UI according to player status
-        CmdCheckIfLeader(NetworkServer.active && NetworkClient.isConnected);
-        CmdSetDisplayName(SteamManager.Initialized ? SteamFriends.GetPersonaName() : "Foo");
+        CmdCheckIfLeader();
         CmdSetReadyState(false);
+        CmdSetDisplayName(SteamManager.Initialized ? SteamFriends.GetPersonaName() : "Foo");
         characterSelectionButton.interactable = true;
     }
 
     [Command]
-    private void CmdCheckIfLeader(bool isHost)
+    private void CmdCheckIfLeader()
     {
         // Become leader if we are the host
-        _isLeader = isHost;
-
-        RpcShowLeaderUI(connectionToClient, _isLeader);
-        RpcSetLeaderIcon(_isLeader);
-    }
-
-    [TargetRpc]
-    private void RpcShowLeaderUI(NetworkConnection target, bool isLeader)
-    {
-        _lobbyMenu.StartGameButton.gameObject.SetActive(isLeader);
-        _lobbyMenu.PlayerInviteWindow.SetActive(isLeader);
+        sync_isLeader = connectionToClient.connectionId == 0;
+        UpdateLeaderUI();
     }
 
     [ClientRpc]
-    private void RpcSetLeaderIcon(bool isLeader)
+    private void UpdateLeaderUI()
     {
-        leaderIcon.SetActive(isLeader);
+        leaderIcon.SetActive(sync_isLeader);
+
+        if (hasAuthority)
+        {
+            _lobbyMenu.StartGameButton.gameObject.SetActive(sync_isLeader);
+            _lobbyMenu.PlayerInviteWindow.SetActive(sync_isLeader);
+        }
     }
 
     private void ToggleReadyState()
     {
-        CmdSetReadyState(!_isReady);
+        CmdSetReadyState(!sync_isReady);
     }
 
     [Command]
     private void CmdSetReadyState(bool isReady)
     {
-        _isReady = isReady;
-
-        RpcSetReadyButtonState(connectionToClient, _isReady);
-        RpcSetPlayerPanelReady(_isReady);
+        sync_isReady = isReady;
+        RpcUpdateReadyState();
         NetworkManagerHousework.Singleton.PlayerChangedReadyState();
     }
 
-    [TargetRpc]
-    private void RpcSetReadyButtonState(NetworkConnection target, bool isReady)
-    {
-        _lobbyMenu.SetReadyButtonState(isReady);
-    }
-
     [ClientRpc]
-    private void RpcSetPlayerPanelReady(bool isready)
+    private void RpcUpdateReadyState()
     {
-        displayNameText.color = _isReady ? Color.green : Color.yellow;
+        // Set state of client's ready button if this is their player object
+        if (hasAuthority) _lobbyMenu.SetReadyButtonState(sync_isReady);
+
+        displayNameText.color = sync_isReady ? Color.green : Color.yellow;
     }
 
     [Command]
     private void CmdSetDisplayName(string displayName)
     {
-        //TODO Validate players display name
-        DisplayName = displayName;
-        RpcSetDisplayName(displayName);
+        sync_displayName = displayName;
     }
 
-    [ClientRpc]
-    private void RpcSetDisplayName(string displayName)
+    private void DisplayNameChanged(string oldValue, string newValue)
     {
-        displayNameText.text = displayName;
+        displayNameText.text = sync_displayName;
     }
 
     [Command]
     public void CmdStartGame()
     {
-        if (_isLeader) NetworkManagerHousework.Singleton.StartGame();
+        if (sync_isLeader) NetworkManagerHousework.Singleton.StartGame();
     }
 
     public void LeaveLobby()
@@ -133,12 +134,13 @@ public class NetworkLobbyPlayer : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        NetworkManagerHousework.Singleton.LobbyPlayers.Add(this);
+        NetworkManagerHousework.Singleton.LobbyPlayers.Add(connectionToClient.connectionId, this);
+        Debug.Log($"This client's connection ID: {connectionToClient.connectionId}".Color("green"));
     }
 
     public override void OnStopClient()
     {
-        NetworkManagerHousework.Singleton.LobbyPlayers.Remove(this);
+        NetworkManagerHousework.Singleton.LobbyPlayers.Remove(connectionToClient.connectionId);
     }
 
     public void ToggleCharacterSelection()

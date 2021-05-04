@@ -2,42 +2,85 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
 using Mirror;
 using Steamworks;
 using TMPro;
 
+[RequireComponent(typeof(NavMeshAgent))]
 public class NetworkGamePlayer : NetworkBehaviour
 {
+    [SerializeField] private TMP_Text displayNameText;
 
-    private RectTransform _lobbyPlayerTrans;
-    private GameObject _currentPlayerSelection;
-    private bool isLeader;
+    [SyncVar(hook = nameof(DisplayNameChanged))]
+    private string sync_displayName = "foo";
 
-    [SyncVar] private string _displayName;
+    private InputActions _input;
+    private NavMeshAgent _agent;
 
-    private NetworkManagerHousework _lobby;
-    private NetworkManagerHousework Lobby
+    public string DisplayName => sync_displayName;
+
+    public override void OnStartAuthority()
     {
-        get
-        {
-            if (_lobby != null) return _lobby;
-            return _lobby = NetworkManager.singleton as NetworkManagerHousework;
-        }
+        _input = new InputActions();
+        _input.Game.RightMouseButton.performed += _ => MoveToClick();
+        _input.Enable();
+
+        CmdEnableNavAgent();
+    }
+
+    public override void OnStopAuthority()
+    {
+        _input.Disable();
     }
 
     public override void OnStartClient()
     {
-        Lobby.GamePlayers.Add(this);
+        NetworkManagerHousework.Singleton.GamePlayers.Add(connectionToClient.connectionId, this);
+
+        UpdateDisplayName();
     }
 
     public override void OnStopClient()
     {
-        Lobby.GamePlayers.Remove(this);
+        NetworkManagerHousework.Singleton.GamePlayers.Remove(connectionToClient.connectionId);
+    }
+
+    public void MoveToClick()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(_input.Game.MousePosition.ReadValue<Vector2>());
+
+        Debug.DrawRay(ray.origin, ray.direction * 20, Color.red, 2);
+        if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hitInfo))
+            CmdRequestMoveTo(hitInfo.point);
+    }
+
+    private void DisplayNameChanged(string oldValue, string newValue)
+    {
+        UpdateDisplayName();
+    }
+
+    private void UpdateDisplayName()
+    {
+        displayNameText.text = sync_displayName;
     }
 
     [Server]
     public void SetDisplayName(string displayname)
     {
-        _displayName = displayname;
+        sync_displayName = displayname;
+    }
+
+    [Command]
+    private void CmdRequestMoveTo(Vector3 position)
+    {
+        _agent.destination = position;
+    }
+
+    [Command]
+    private void CmdEnableNavAgent()
+    {
+        _agent = GetComponent<NavMeshAgent>();
+        _agent.enabled = true;
     }
 }

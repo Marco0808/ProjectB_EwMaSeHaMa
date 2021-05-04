@@ -63,4 +63,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  playerPrefab: {fileID: 6297991501529446607, guid: 60b5af68ae4be8a459a0ce85285b9a4f, type: 3}
+  gamePlayerPrefab: {fileID: 6237668881987465340, guid: 6ceb8f8165ab7274c834066de7e432e5, type: 3}

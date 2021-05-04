@@ -5,7 +5,7 @@ using Mirror;
 
 public class PlayerSpawnSystem : NetworkBehaviour
 {
-    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
 
     private static List<Transform> _spawnPoints = new List<Transform>();
 
@@ -43,8 +43,20 @@ public class PlayerSpawnSystem : NetworkBehaviour
             return;
         }
 
-        GameObject player = Instantiate(playerPrefab, _spawnPoints[_nextIndex].position, _spawnPoints[_nextIndex].rotation);
-        NetworkServer.Spawn(player, conn);
+        // spawn and authorize new player object
+        NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
+        gamePlayer.gameObject.name = $"{gamePlayerPrefab.name} [connId={conn.connectionId}]";
+
+        NetworkManagerHousework.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer);
+        gamePlayer.SetDisplayName(lobbyPlayer.DisplayName);
+
+        // Destroy and replace connection's old player object if it still exist, otherwise add new player
+        if (conn.identity)
+        {
+            NetworkServer.Destroy(conn.identity.gameObject);
+            NetworkServer.ReplacePlayerForConnection(conn, gamePlayer.gameObject);
+        }
+        else NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
 
         _nextIndex++;
     }
