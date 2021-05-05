@@ -1,7 +1,18 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
+<<<<<<< HEAD:Assets/Scripts/ScriptableObjects.meta
 guid: 8a793b1ee303d164eb1a0eb232083a7c
 folderAsset: yes
 DefaultImporter:
+=======
+guid: 96c8cccb065d175488721211c219b69e
+PrefabImporter:
+>>>>>>> marco:Assets/Prefabs/Interactables/TaskObject.prefab.meta
+=======
+guid: 8a793b1ee303d164eb1a0eb232083a7c
+folderAsset: yes
+DefaultImporter:
+>>>>>>> marco
   externalObjects: {}
   userData: 
   assetBundleName: 
