@@ -25,12 +25,6 @@ public class NetworkGamePlayer : NetworkBehaviour
     public CharacterData Character => gameData.GetCharacterById(sync_characterId);
 
 
-    private void Update()
-    {
-        // Set display name facing to camera
-        displayNameText.transform.rotation = Camera.main.transform.rotation;
-    }
-
     public override void OnStartAuthority()
     {
 
@@ -87,6 +81,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _agent.enabled = true;
+        _agent.updateRotation = false;
     }
 
     [Server]

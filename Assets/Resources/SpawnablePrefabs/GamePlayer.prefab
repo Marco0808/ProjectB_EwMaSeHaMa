@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7387192051770597779}
+  - component: {fileID: 8199879584013983102}
   - component: {fileID: 5463867580088684926}
   - component: {fileID: 4617159372081704148}
   m_Layer: 0
@@ -27,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 67505917857425904}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: -1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7496532765274393879}
   m_RootOrder: 1
@@ -37,6 +38,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 3}
   m_SizeDelta: {x: 7, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8199879584013983102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67505917857425904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62972411c4df4f1449a42d47bf37b600, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoUpdateFacing: 0
 --- !u!23 &5463867580088684926
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -186,7 +200,7 @@ GameObject:
   - component: {fileID: 2996558021669049828}
   m_Layer: 0
   m_Name: GamePlayer
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -2,10 +2,10 @@ using UnityEngine;
 using NaughtyAttributes;
 
 [ExecuteInEditMode]
-public class FaceCamera : MonoBehaviour
+public class ObjectFacingCamera : MonoBehaviour
 {
     [Tooltip("Camera facing is automatically updated in the editor and on game start.\nYou can't rotate the object if this is enabled.")]
-    [SerializeField] private bool autoUpdateFacing = true;
+    [SerializeField] private bool autoUpdateFacing = false;
 
     private void Update()
     {
