@@ -44,14 +44,14 @@ public class PlayerSpawnSystem : NetworkBehaviour
         }
 
         // spawn and authorize new player object
-        NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
+        NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab, _spawnPoints[_nextIndex].position, _spawnPoints[_nextIndex].rotation);
         gamePlayer.gameObject.name = $"{gamePlayerPrefab.name} [connId={conn.connectionId}]";
 
         NetworkManagerHousework.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer);
-        gamePlayer.SetDisplayName(lobbyPlayer.DisplayName);
+        gamePlayer.SetupPlayer(lobbyPlayer.DisplayName, lobbyPlayer.CharacterId);
 
         // Destroy and replace connection's old player object if it still exist, otherwise add new player
-        if (conn.identity)
+        if (conn.identity != null)
         {
             NetworkServer.Destroy(conn.identity.gameObject);
             NetworkServer.ReplacePlayerForConnection(conn, gamePlayer.gameObject);

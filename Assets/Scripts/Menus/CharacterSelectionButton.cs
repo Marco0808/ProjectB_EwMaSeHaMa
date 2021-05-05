@@ -5,21 +5,20 @@ using UnityEngine.UI;
 
 public class CharacterSelectionButton : MonoBehaviour
 {
-    [SerializeField] Image portrait;
+    [SerializeField] private Image characterPortrait;
 
     public static event Action<CharacterData> OnCharacterSelected;
 
     private CharacterData _character;
 
+    public void SetCharacter(CharacterData character)
+    {
+        _character = character;
+        characterPortrait.sprite = character.Portrait;
+    }
+
     public void CharacterSelected()
     {
         OnCharacterSelected?.Invoke(_character);
     }
-
-    private void Initialize(CharacterData character)
-    {
-        _character = character;
-        portrait.sprite = character.Portrait;
-    }
-
 }

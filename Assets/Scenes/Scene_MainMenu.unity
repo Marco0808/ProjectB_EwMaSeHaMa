@@ -1023,8 +1023,8 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 8854757344751076425, guid: 4d6b5e52439e8e94aafaa989aa0a2f74, type: 3}
-  autoCreatePlayer: 1
+  playerPrefab: {fileID: 0}
+  autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
   minPlayers: 0
@@ -1032,7 +1032,7 @@ MonoBehaviour:
   lobbyPlayerPrefab: {fileID: 8854757344751076422, guid: 4d6b5e52439e8e94aafaa989aa0a2f74, type: 3}
   gameScene: Assets/Scenes/Scene_Game.unity
   gamePlayerPrefab: {fileID: 6237668881987465340, guid: 6ceb8f8165ab7274c834066de7e432e5, type: 3}
-  playerSpawnSystem: {fileID: 9143434194214237576, guid: 3819a5333fe879142b4307b8b5b89de0, type: 3}
+  spawnSystemPrefab: {fileID: 9143434194214237576, guid: 3819a5333fe879142b4307b8b5b89de0, type: 3}
 --- !u!4 &639811173
 Transform:
   m_ObjectHideFlags: 0

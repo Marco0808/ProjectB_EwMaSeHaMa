@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdcf8574f1a301049b9c5858885a1a86, type: 3}
   m_Name: Character_Purple
   m_EditorClassIdentifier: 
-  color: {r: 0.764151, g: 0.082903184, b: 0.75005597, a: 0}
+  color: {r: 0.764151, g: 0.082903184, b: 0.75005597, a: 1}
   portrait: {fileID: 21300000, guid: ef07448ba1e024b4085433add0941ed9, type: 3}
   playerCharacter: {fileID: 0}

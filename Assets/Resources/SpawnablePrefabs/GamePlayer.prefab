@@ -238,7 +238,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
   displayNameText: {fileID: 4617159372081704148}
+  meshRenderer: {fileID: 3955018303930995868}
 --- !u!195 &-4171755173673709000
 NavMeshAgent:
   m_ObjectHideFlags: 0

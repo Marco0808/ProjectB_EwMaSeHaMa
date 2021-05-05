@@ -255,8 +255,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LobbyPlayerPanel, Assembly-CSharp
+      - m_Target: {fileID: 8854757344751076422}
+        m_TargetAssemblyTypeName: NetworkLobbyPlayer, Assembly-CSharp
         m_MethodName: ToggleCharacterSelection
         m_Mode: 1
         m_Arguments:
@@ -403,7 +403,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -563,5 +563,7 @@ MonoBehaviour:
   displayNameText: {fileID: 4096984330776066371}
   leaderIcon: {fileID: 5810266827869856518}
   characterSelectionButton: {fileID: 1562633239033994042}
+  gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
   characterPortrait: {fileID: 4068068855935317687}
+  characterSelectionButtonPrefab: {fileID: 6713480710342046647, guid: e1a9891da1024ce4682bd2cb769d45e7, type: 3}
   characterSelectionPrefab: {fileID: 8535967926616537778, guid: 0b32fb6199c99aa43b26e947b07214a3, type: 3}

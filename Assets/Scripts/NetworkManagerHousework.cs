@@ -15,7 +15,7 @@ public class NetworkManagerHousework : NetworkManager
     [Header("Game")]
     [Scene, SerializeField] private string gameScene;
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
-    [SerializeField] private GameObject playerSpawnSystem;
+    [SerializeField] private GameObject spawnSystemPrefab;
 
     private static NetworkManagerHousework _singleton;
     public static NetworkManagerHousework Singleton
@@ -57,6 +57,10 @@ public class NetworkManagerHousework : NetworkManager
     {
         base.OnClientConnect(conn);
 
+        // Add player for any client that is not currently loading a scene, as long as we are still in the lobby. (Only applies to host)
+        if (!clientLoadedScene && !IsGameInProgress)
+            NetworkClient.AddPlayer();
+
         OnClientConnected?.Invoke();
     }
 
@@ -73,16 +77,27 @@ public class NetworkManagerHousework : NetworkManager
         if (numPlayers >= maxConnections)
         {
             //TODO Send server full message
+            Debug.Log("New client disconnected. Lobby is full.".Color("green"));
             conn.Disconnect();
             return;
         }
 
-        //TODO Disconnect new client if game is already in progress
+        //Disconnect new client if game is already in progress
         if (IsGameInProgress)
         {
+            //TODO Send game in progress message
+            Debug.Log("New client disconnected. Game is already in progress.".Color("green"));
             conn.Disconnect();
             return;
         }
+    }
+
+    public override void OnClientSceneChanged(NetworkConnection conn)
+    {
+        base.OnClientSceneChanged(conn);
+
+        if (NetworkClient.localPlayer == null && !IsGameInProgress)
+            NetworkClient.AddPlayer();
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
@@ -91,8 +106,8 @@ public class NetworkManagerHousework : NetworkManager
         if (!IsGameInProgress)
         {
             NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab);
-            lobbyPlayer.gameObject.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
-            lobbyPlayer.LobbyPlayerPanel.name = $"{playerPrefab.name}Panel [connId={conn.connectionId}]";
+            lobbyPlayer.gameObject.name = $"{lobbyPlayerPrefab.name} [connId={conn.connectionId}]";
+            lobbyPlayer.LobbyPlayerPanel.name = $"{lobbyPlayerPrefab.name}Panel [connId={conn.connectionId}]";
 
             NetworkServer.AddPlayerForConnection(conn, lobbyPlayer.gameObject);
         }
@@ -124,6 +139,12 @@ public class NetworkManagerHousework : NetworkManager
     public override void OnServerSceneChanged(string sceneName)
     {
         Debug.Log($"Server changed scene to {sceneName}".Color("green"));
+
+        if (sceneName == gameScene)
+        {
+            GameObject spawnSystem = Instantiate(spawnSystemPrefab);
+            NetworkServer.Spawn(spawnSystem);
+        }
     }
 
     public void PlayerChangedReadyState()

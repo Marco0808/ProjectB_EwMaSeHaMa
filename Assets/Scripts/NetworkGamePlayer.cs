@@ -10,21 +10,38 @@ using TMPro;
 [RequireComponent(typeof(NavMeshAgent))]
 public class NetworkGamePlayer : NetworkBehaviour
 {
+    [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text displayNameText;
+    [SerializeField] private MeshRenderer meshRenderer;
 
-    [SyncVar(hook = nameof(DisplayNameChanged))]
-    private string sync_displayName = "foo";
+    [SyncVar] private string sync_displayName = "foo";
+    [SyncVar] private int sync_characterId;
 
     private InputActions _input;
+    private GameMenu _gameMenu;
     private NavMeshAgent _agent;
 
     public string DisplayName => sync_displayName;
+    public CharacterData Character => gameData.GetCharacterById(sync_characterId);
+
+
+    private void Update()
+    {
+        // Set display name facing to camera
+        displayNameText.transform.rotation = Camera.main.transform.rotation;
+    }
 
     public override void OnStartAuthority()
     {
+
         _input = new InputActions();
         _input.Game.RightMouseButton.performed += _ => MoveToClick();
         _input.Enable();
+
+        _gameMenu = FindObjectOfType<GameMenu>();
+        _gameMenu.SetLocalPlayerColor(gameData.GetCharacterById(sync_characterId).Color);
+
+        GameMenu.OnLeaveGameButtonPressed += LeaveGame;
 
         CmdEnableNavAgent();
     }
@@ -36,12 +53,16 @@ public class NetworkGamePlayer : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        NetworkManagerHousework.Singleton.GamePlayers.Add(connectionToClient.connectionId, this);
-
-        UpdateDisplayName();
+        displayNameText.text = sync_displayName;
+        meshRenderer.material.color = Character.Color;
     }
 
-    public override void OnStopClient()
+    public override void OnStartServer()
+    {
+        NetworkManagerHousework.Singleton.GamePlayers.Add(connectionToClient.connectionId, this);
+    }
+
+    public override void OnStopServer()
     {
         NetworkManagerHousework.Singleton.GamePlayers.Remove(connectionToClient.connectionId);
     }
@@ -55,22 +76,6 @@ public class NetworkGamePlayer : NetworkBehaviour
             CmdRequestMoveTo(hitInfo.point);
     }
 
-    private void DisplayNameChanged(string oldValue, string newValue)
-    {
-        UpdateDisplayName();
-    }
-
-    private void UpdateDisplayName()
-    {
-        displayNameText.text = sync_displayName;
-    }
-
-    [Server]
-    public void SetDisplayName(string displayname)
-    {
-        sync_displayName = displayname;
-    }
-
     [Command]
     private void CmdRequestMoveTo(Vector3 position)
     {
@@ -82,5 +87,23 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _agent.enabled = true;
+    }
+
+    [Server]
+    public void SetupPlayer(string displayname, int characterId)
+    {
+        sync_displayName = displayname;
+        sync_characterId = characterId;
+    }
+
+    public void LeaveGame()
+    {
+        // stop host if is host
+        if (NetworkServer.active && NetworkClient.isConnected)
+            NetworkManagerHousework.Singleton.StopHost();
+
+        // stop client if client-only
+        if (NetworkClient.isConnected)
+            NetworkManagerHousework.Singleton.StopClient();
     }
 }
