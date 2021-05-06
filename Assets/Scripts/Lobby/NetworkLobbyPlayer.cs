@@ -169,7 +169,6 @@ public class NetworkLobbyPlayer : NetworkBehaviour
             _currentCharacterSelection.transform.localPosition = new Vector3(_currentCharacterSelection.GetComponent<RectTransform>().sizeDelta.x, 0, 0);
 
             GridLayoutGroup buttonGridContainer = _currentCharacterSelection.GetComponentInChildren<GridLayoutGroup>();
-            Debug.Log(_currentCharacterSelection);
 
             // Poppulate grid with a button for each available character
             for (int i = 0; i < gameData.AvailableCharacters.Length; i++)

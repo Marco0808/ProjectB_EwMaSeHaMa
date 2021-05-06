@@ -147,6 +147,7 @@ public class NetworkManagerHousework : NetworkManager
         }
     }
 
+    [Server]
     public void PlayerChangedReadyState()
     {
         // check if everyone is ready and set the host's start game button accordingly
@@ -167,6 +168,7 @@ public class NetworkManagerHousework : NetworkManager
         return true;
     }
 
+    [Server]
     public void StartGame()
     {
         if (!IsGameInProgress && IsReadyToStart())

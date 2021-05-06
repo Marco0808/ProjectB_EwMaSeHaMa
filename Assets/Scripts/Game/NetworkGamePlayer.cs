@@ -10,6 +10,11 @@ using TMPro;
 [RequireComponent(typeof(NavMeshAgent))]
 public class NetworkGamePlayer : NetworkBehaviour
 {
+    [Header("Input")]
+    [SerializeField] private LayerMask clickableLayers;
+    [SerializeField] private float maxMouseRayDistance = 50;
+
+    [Header("References")]
     [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text displayNameText;
     [SerializeField] private MeshRenderer meshRenderer;
@@ -21,6 +26,8 @@ public class NetworkGamePlayer : NetworkBehaviour
     private GameMenu _gameMenu;
     private NavMeshAgent _agent;
 
+    private TaskObject _highlightedTaskObject;
+
     public string DisplayName => sync_displayName;
     public CharacterData Character => gameData.GetCharacterById(sync_characterId);
 
@@ -29,7 +36,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
 
         _input = new InputActions();
-        _input.Game.RightMouseButton.performed += _ => MoveToClick();
+        _input.Game.RightMouseButton.performed += _ => TryMoveToTaskObject();
         _input.Enable();
 
         _gameMenu = FindObjectOfType<GameMenu>();
@@ -61,17 +68,50 @@ public class NetworkGamePlayer : NetworkBehaviour
         NetworkManagerHousework.Singleton.GamePlayers.Remove(connectionToClient.connectionId);
     }
 
-    public void MoveToClick()
+    [ClientCallback]
+    public void Update()
     {
-        Ray ray = Camera.main.ScreenPointToRay(_input.Game.MousePosition.ReadValue<Vector2>());
+        // Run mouse input behavior if we have authority
+        if (hasAuthority)
+        {
+            Ray mouseRay = Camera.main.ScreenPointToRay(_input.Game.MousePosition.ReadValue<Vector2>());
+            Debug.DrawRay(mouseRay.origin, mouseRay.direction * maxMouseRayDistance, Color.green);
 
-        Debug.DrawRay(ray.origin, ray.direction * 20, Color.red, 2);
-        if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hitInfo))
-            CmdRequestMoveTo(hitInfo.point);
+            if (Physics.Raycast(mouseRay, out RaycastHit newMouseHit, maxMouseRayDistance, clickableLayers))
+            {
+                // If another object was hit as before, set the new one highlighted and the old one not
+                if (TryGetTaskObjectFromHit(newMouseHit, out TaskObject newTaskObject) && newTaskObject != _highlightedTaskObject)
+                {
+                    _highlightedTaskObject?.SetHighlighted(false);
+                    newTaskObject.SetHighlighted(true);
+
+                    _highlightedTaskObject = newTaskObject;
+                }
+            }
+            // Stop highlighting previous TaskObject and clear it if nothing was hit
+            else if (_highlightedTaskObject)
+            {
+                _highlightedTaskObject.SetHighlighted(false);
+                _highlightedTaskObject = null;
+            }
+        }
+    }
+
+    private bool TryGetTaskObjectFromHit(RaycastHit hit, out TaskObject taskObject)
+    {
+        taskObject = null;
+        if (hit.collider == null) return false;
+        return hit.collider.CompareTag("TaskObject") && hit.collider.TryGetComponent(out taskObject);
+    }
+
+    private void TryMoveToTaskObject()
+    {
+        if (_highlightedTaskObject)
+            CmdSetPlayerDestination(_highlightedTaskObject.TaskPosition);
     }
 
     [Command]
-    private void CmdRequestMoveTo(Vector3 position)
+    private void CmdSetPlayerDestination(Vector3 position)
     {
         _agent.destination = position;
     }

@@ -16,8 +16,7 @@ public class PlayerSpawnPoint : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, 1f);
-        Gizmos.DrawLine(transform.position, transform.position + transform.forward * 2);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 0.5f);
     }
 }
