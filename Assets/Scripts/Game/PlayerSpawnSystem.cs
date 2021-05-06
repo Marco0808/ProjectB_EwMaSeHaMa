@@ -44,7 +44,8 @@ public class PlayerSpawnSystem : NetworkBehaviour
         }
 
         // spawn and authorize new player object
-        NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab, _spawnPoints[_nextIndex].position, _spawnPoints[_nextIndex].rotation);
+        NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
+        gamePlayer.transform.position = _spawnPoints[_nextIndex].position;
         gamePlayer.gameObject.name = $"{gamePlayerPrefab.name} [connId={conn.connectionId}]";
 
         NetworkManagerHousework.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer);

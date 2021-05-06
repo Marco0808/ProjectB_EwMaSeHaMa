@@ -4,7 +4,7 @@ using UnityEngine;
 using Mirror;
 using NaughtyAttributes;
 
-[RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class TaskObject : MonoBehaviour
 {
     [SerializeField, OnValueChanged("UpdateTaskObject")] private TaskObjectData taskObjectData;
@@ -27,14 +27,28 @@ public class TaskObject : MonoBehaviour
         StartCoroutine(ResetCollider());
     }
 
+    public void SetHighlighted(bool isHighlighted)
+    {
+        SetSpriteBrightness(isHighlighted ? 1 : 0.5f);
+    }
+
+    /// <param name="brightness">Value between 0 and 1. Default brightness is 0.5</param>
+    private void SetSpriteBrightness(float brightness)
+    {
+        Color color = _spriteRenderer.color;
+        color.a = Mathf.Clamp01(brightness);
+        _spriteRenderer.color = color;
+    }
+
     [Button("Update Task Object", EButtonEnableMode.Always)]
     private void UpdateTaskObject() => GetComponent<SpriteRenderer>().sprite = taskObjectData.ObjectSprite;
 
     IEnumerator ResetCollider()
     {
-        Destroy(_collider);
+        if (_collider) Destroy(_collider);
         yield return null;
         _collider = gameObject.AddComponent<BoxCollider>();
+        _collider.isTrigger = true;
     }
 
     private void OnMouseEnter()
