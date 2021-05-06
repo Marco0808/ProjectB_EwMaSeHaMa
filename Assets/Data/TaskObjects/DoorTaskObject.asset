@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: DoorTaskObject
   m_EditorClassIdentifier: 
   objectSprite: {fileID: 21300000, guid: c26581527ea11ea4180870a67a852637, type: 3}
-  objectName: Door
+  taskName: Cook Food
+  icon: {fileID: 21300000, guid: c26581527ea11ea4180870a67a852637, type: 3}
   maxPlayersAtTask: 1
+  workingTime: 1

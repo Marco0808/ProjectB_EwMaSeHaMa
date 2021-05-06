@@ -60,6 +60,14 @@
                     "interactions": ""
                 },
                 {
+                    "name": "LeftMouseButton",
+                    "type": "Button",
+                    "id": "5ef0ee42-6261-41c3-9148-f13fe054d93c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
                     "name": "MousePosition",
                     "type": "Value",
                     "id": "ca7f5320-aa93-4da3-b9e8-a8680a601245",
@@ -90,6 +98,17 @@
                     "action": "MousePosition",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cbf3d026-3dab-448e-be7e-f02595599e75",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardAndMouse",
+                    "action": "LeftMouseButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
@@ -106,17 +125,6 @@
                 },
                 {
                     "devicePath": "<Mouse>",
-                    "isOptional": false,
-                    "isOR": false
-                }
-            ]
-        },
-        {
-            "name": "Gamepad",
-            "bindingGroup": "Gamepad",
-            "devices": [
-                {
-                    "devicePath": "<Gamepad>",
                     "isOptional": false,
                     "isOR": false
                 }

@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: GateTaskObject
   m_EditorClassIdentifier: 
   objectSprite: {fileID: 21300000, guid: 5b76e3aac78e0e447a583994215261c3, type: 3}
-  objectName: Gate
+  taskName: Watch TV
+  icon: {fileID: 21300000, guid: c26581527ea11ea4180870a67a852637, type: 3}
   maxPlayersAtTask: 2
+  workingTime: 1

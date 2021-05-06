@@ -7,12 +7,14 @@ using NaughtyAttributes;
 [RequireComponent(typeof(SpriteRenderer))]
 public class TaskObject : MonoBehaviour
 {
-    [SerializeField, OnValueChanged("UpdateTaskObject")] private TaskObjectData taskObjectData;
+    [SerializeField, OnValueChanged("UpdateTaskObject")] private TaskData taskData;
+    [SerializeField] private Transform taskMenuRoot;
 
     private SpriteRenderer _spriteRenderer;
     private Collider _collider;
 
-    public TaskObjectData TaskObjectData => taskObjectData;
+    public TaskData TaskData => taskData;
+    public Transform TaskMenuRoot => taskMenuRoot;
     public Vector3 TaskPosition => transform.position;
 
     private void Awake()
@@ -23,7 +25,7 @@ public class TaskObject : MonoBehaviour
 
     private void Start()
     {
-        _spriteRenderer.sprite = taskObjectData.ObjectSprite;
+        _spriteRenderer.sprite = taskData.ObjectSprite;
         StartCoroutine(ResetCollider());
     }
 
@@ -41,7 +43,7 @@ public class TaskObject : MonoBehaviour
     }
 
     [Button("Update Task Object", EButtonEnableMode.Always)]
-    private void UpdateTaskObject() => GetComponent<SpriteRenderer>().sprite = taskObjectData.ObjectSprite;
+    private void UpdateTaskObject() => GetComponent<SpriteRenderer>().sprite = taskData.ObjectSprite;
 
     IEnumerator ResetCollider()
     {

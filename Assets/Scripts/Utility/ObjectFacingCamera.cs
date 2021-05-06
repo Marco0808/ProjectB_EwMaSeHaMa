@@ -5,7 +5,7 @@ using NaughtyAttributes;
 public class ObjectFacingCamera : MonoBehaviour
 {
     [Tooltip("Camera facing is automatically updated in the editor and on game start.\nYou can't rotate the object if this is enabled.")]
-    [SerializeField] private bool autoUpdateFacing = false;
+    [SerializeField] private bool autoUpdateFacing = true;
 
     private void Update()
     {

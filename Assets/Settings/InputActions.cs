@@ -73,6 +73,14 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
+                    ""name"": ""LeftMouseButton"",
+                    ""type"": ""Button"",
+                    ""id"": ""5ef0ee42-6261-41c3-9148-f13fe054d93c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
                     ""name"": ""MousePosition"",
                     ""type"": ""Value"",
                     ""id"": ""ca7f5320-aa93-4da3-b9e8-a8680a601245"",
@@ -103,6 +111,17 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""action"": ""MousePosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cbf3d026-3dab-448e-be7e-f02595599e75"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardAndMouse"",
+                    ""action"": ""LeftMouseButton"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -123,17 +142,6 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""isOR"": false
                 }
             ]
-        },
-        {
-            ""name"": ""Gamepad"",
-            ""bindingGroup"": ""Gamepad"",
-            ""devices"": [
-                {
-                    ""devicePath"": ""<Gamepad>"",
-                    ""isOptional"": false,
-                    ""isOR"": false
-                }
-            ]
         }
     ]
 }");
@@ -144,6 +152,7 @@ public class @InputActions : IInputActionCollection, IDisposable
         // Game
         m_Game = asset.FindActionMap("Game", throwIfNotFound: true);
         m_Game_RightMouseButton = m_Game.FindAction("RightMouseButton", throwIfNotFound: true);
+        m_Game_LeftMouseButton = m_Game.FindAction("LeftMouseButton", throwIfNotFound: true);
         m_Game_MousePosition = m_Game.FindAction("MousePosition", throwIfNotFound: true);
     }
 
@@ -236,12 +245,14 @@ public class @InputActions : IInputActionCollection, IDisposable
     private readonly InputActionMap m_Game;
     private IGameActions m_GameActionsCallbackInterface;
     private readonly InputAction m_Game_RightMouseButton;
+    private readonly InputAction m_Game_LeftMouseButton;
     private readonly InputAction m_Game_MousePosition;
     public struct GameActions
     {
         private @InputActions m_Wrapper;
         public GameActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @RightMouseButton => m_Wrapper.m_Game_RightMouseButton;
+        public InputAction @LeftMouseButton => m_Wrapper.m_Game_LeftMouseButton;
         public InputAction @MousePosition => m_Wrapper.m_Game_MousePosition;
         public InputActionMap Get() { return m_Wrapper.m_Game; }
         public void Enable() { Get().Enable(); }
@@ -255,6 +266,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @RightMouseButton.started -= m_Wrapper.m_GameActionsCallbackInterface.OnRightMouseButton;
                 @RightMouseButton.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnRightMouseButton;
                 @RightMouseButton.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnRightMouseButton;
+                @LeftMouseButton.started -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
+                @LeftMouseButton.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
+                @LeftMouseButton.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
                 @MousePosition.started -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
                 @MousePosition.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
                 @MousePosition.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
@@ -265,6 +279,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @RightMouseButton.started += instance.OnRightMouseButton;
                 @RightMouseButton.performed += instance.OnRightMouseButton;
                 @RightMouseButton.canceled += instance.OnRightMouseButton;
+                @LeftMouseButton.started += instance.OnLeftMouseButton;
+                @LeftMouseButton.performed += instance.OnLeftMouseButton;
+                @LeftMouseButton.canceled += instance.OnLeftMouseButton;
                 @MousePosition.started += instance.OnMousePosition;
                 @MousePosition.performed += instance.OnMousePosition;
                 @MousePosition.canceled += instance.OnMousePosition;
@@ -281,15 +298,6 @@ public class @InputActions : IInputActionCollection, IDisposable
             return asset.controlSchemes[m_KeyboardAndMouseSchemeIndex];
         }
     }
-    private int m_GamepadSchemeIndex = -1;
-    public InputControlScheme GamepadScheme
-    {
-        get
-        {
-            if (m_GamepadSchemeIndex == -1) m_GamepadSchemeIndex = asset.FindControlSchemeIndex("Gamepad");
-            return asset.controlSchemes[m_GamepadSchemeIndex];
-        }
-    }
     public interface IMenuActions
     {
         void OnContinue(InputAction.CallbackContext context);
@@ -298,6 +306,7 @@ public class @InputActions : IInputActionCollection, IDisposable
     public interface IGameActions
     {
         void OnRightMouseButton(InputAction.CallbackContext context);
+        void OnLeftMouseButton(InputAction.CallbackContext context);
         void OnMousePosition(InputAction.CallbackContext context);
     }
 }
