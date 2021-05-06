@@ -78,7 +78,7 @@ GameObject:
   - component: {fileID: 2608874699922423483}
   - component: {fileID: 2608874699922423487}
   m_Layer: 6
-  m_Name: TaskObjectMenu
+  m_Name: TaskMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -102,7 +102,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.23, y: 1.45}
+  m_AnchoredPosition: {x: -0.22998047, y: 1.4500122}
   m_SizeDelta: {x: 5, y: 3}
   m_Pivot: {x: 0, y: 0}
 --- !u!223 &2608874699922423481
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &2608874699922423483
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.69803923}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.9019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
