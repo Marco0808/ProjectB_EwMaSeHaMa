@@ -65,7 +65,7 @@ public class @InputActions : IInputActionCollection, IDisposable
             ""id"": ""a2bb38cc-41b6-4ffb-8d52-25289e471230"",
             ""actions"": [
                 {
-                    ""name"": ""RightMouseButton"",
+                    ""name"": ""CameraGrab"",
                     ""type"": ""Button"",
                     ""id"": ""c7bbea6c-6704-4973-bbf9-5e0386f831ee"",
                     ""expectedControlType"": ""Button"",
@@ -87,6 +87,14 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""WASD"",
+                    ""type"": ""Value"",
+                    ""id"": ""8927bddb-3c71-470b-a31d-e017f2b9fa43"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -97,7 +105,18 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardAndMouse"",
-                    ""action"": ""RightMouseButton"",
+                    ""action"": ""CameraGrab"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1dfe184f-3d31-4b40-a49e-51e62395e9ea"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardAndMouse"",
+                    ""action"": ""CameraGrab"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -122,6 +141,61 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""action"": ""LeftMouseButton"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""f31b7f3d-d2be-41b4-af6f-9f8e9f7f891c"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WASD"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""212dff35-cc0d-432c-931d-53cb5f33eda0"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WASD"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""80d14913-ce3b-44a8-b1ea-54f351c1dd8c"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WASD"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""a5dfa689-89e2-4e79-90ef-5c0067c5bd01"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WASD"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""ab9947e4-1925-4125-99a6-5f12d8f159ac"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WASD"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -151,9 +225,10 @@ public class @InputActions : IInputActionCollection, IDisposable
         m_Menu_Back = m_Menu.FindAction("Back", throwIfNotFound: true);
         // Game
         m_Game = asset.FindActionMap("Game", throwIfNotFound: true);
-        m_Game_RightMouseButton = m_Game.FindAction("RightMouseButton", throwIfNotFound: true);
+        m_Game_CameraGrab = m_Game.FindAction("CameraGrab", throwIfNotFound: true);
         m_Game_LeftMouseButton = m_Game.FindAction("LeftMouseButton", throwIfNotFound: true);
         m_Game_MousePosition = m_Game.FindAction("MousePosition", throwIfNotFound: true);
+        m_Game_WASD = m_Game.FindAction("WASD", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -244,16 +319,18 @@ public class @InputActions : IInputActionCollection, IDisposable
     // Game
     private readonly InputActionMap m_Game;
     private IGameActions m_GameActionsCallbackInterface;
-    private readonly InputAction m_Game_RightMouseButton;
+    private readonly InputAction m_Game_CameraGrab;
     private readonly InputAction m_Game_LeftMouseButton;
     private readonly InputAction m_Game_MousePosition;
+    private readonly InputAction m_Game_WASD;
     public struct GameActions
     {
         private @InputActions m_Wrapper;
         public GameActions(@InputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @RightMouseButton => m_Wrapper.m_Game_RightMouseButton;
+        public InputAction @CameraGrab => m_Wrapper.m_Game_CameraGrab;
         public InputAction @LeftMouseButton => m_Wrapper.m_Game_LeftMouseButton;
         public InputAction @MousePosition => m_Wrapper.m_Game_MousePosition;
+        public InputAction @WASD => m_Wrapper.m_Game_WASD;
         public InputActionMap Get() { return m_Wrapper.m_Game; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -263,28 +340,34 @@ public class @InputActions : IInputActionCollection, IDisposable
         {
             if (m_Wrapper.m_GameActionsCallbackInterface != null)
             {
-                @RightMouseButton.started -= m_Wrapper.m_GameActionsCallbackInterface.OnRightMouseButton;
-                @RightMouseButton.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnRightMouseButton;
-                @RightMouseButton.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnRightMouseButton;
+                @CameraGrab.started -= m_Wrapper.m_GameActionsCallbackInterface.OnCameraGrab;
+                @CameraGrab.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnCameraGrab;
+                @CameraGrab.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnCameraGrab;
                 @LeftMouseButton.started -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
                 @LeftMouseButton.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
                 @LeftMouseButton.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
                 @MousePosition.started -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
                 @MousePosition.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
                 @MousePosition.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
+                @WASD.started -= m_Wrapper.m_GameActionsCallbackInterface.OnWASD;
+                @WASD.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnWASD;
+                @WASD.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnWASD;
             }
             m_Wrapper.m_GameActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @RightMouseButton.started += instance.OnRightMouseButton;
-                @RightMouseButton.performed += instance.OnRightMouseButton;
-                @RightMouseButton.canceled += instance.OnRightMouseButton;
+                @CameraGrab.started += instance.OnCameraGrab;
+                @CameraGrab.performed += instance.OnCameraGrab;
+                @CameraGrab.canceled += instance.OnCameraGrab;
                 @LeftMouseButton.started += instance.OnLeftMouseButton;
                 @LeftMouseButton.performed += instance.OnLeftMouseButton;
                 @LeftMouseButton.canceled += instance.OnLeftMouseButton;
                 @MousePosition.started += instance.OnMousePosition;
                 @MousePosition.performed += instance.OnMousePosition;
                 @MousePosition.canceled += instance.OnMousePosition;
+                @WASD.started += instance.OnWASD;
+                @WASD.performed += instance.OnWASD;
+                @WASD.canceled += instance.OnWASD;
             }
         }
     }
@@ -305,8 +388,9 @@ public class @InputActions : IInputActionCollection, IDisposable
     }
     public interface IGameActions
     {
-        void OnRightMouseButton(InputAction.CallbackContext context);
+        void OnCameraGrab(InputAction.CallbackContext context);
         void OnLeftMouseButton(InputAction.CallbackContext context);
         void OnMousePosition(InputAction.CallbackContext context);
+        void OnWASD(InputAction.CallbackContext context);
     }
 }

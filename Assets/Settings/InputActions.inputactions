@@ -52,7 +52,7 @@
             "id": "a2bb38cc-41b6-4ffb-8d52-25289e471230",
             "actions": [
                 {
-                    "name": "RightMouseButton",
+                    "name": "CameraGrab",
                     "type": "Button",
                     "id": "c7bbea6c-6704-4973-bbf9-5e0386f831ee",
                     "expectedControlType": "Button",
@@ -74,6 +74,14 @@
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "WASD",
+                    "type": "Value",
+                    "id": "8927bddb-3c71-470b-a31d-e017f2b9fa43",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -84,7 +92,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardAndMouse",
-                    "action": "RightMouseButton",
+                    "action": "CameraGrab",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1dfe184f-3d31-4b40-a49e-51e62395e9ea",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardAndMouse",
+                    "action": "CameraGrab",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -109,6 +128,61 @@
                     "action": "LeftMouseButton",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "2D Vector",
+                    "id": "f31b7f3d-d2be-41b4-af6f-9f8e9f7f891c",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WASD",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "212dff35-cc0d-432c-931d-53cb5f33eda0",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WASD",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "80d14913-ce3b-44a8-b1ea-54f351c1dd8c",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WASD",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "a5dfa689-89e2-4e79-90ef-5c0067c5bd01",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WASD",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "ab9947e4-1925-4125-99a6-5f12d8f159ac",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WASD",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         }
