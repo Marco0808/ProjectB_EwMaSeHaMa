@@ -1,24 +1,40 @@
-using System.Collections.ObjectModel;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New GameData", menuName = "Custom/Game Data")]
+[CreateAssetMenu(fileName = "New GameData", menuName = "Housework/Game Data")]
 public class GameData : ScriptableObject
 {
-    [SerializeField] CharacterData[] availableCharacters;
+    [Header("Balancing Values")]
+    [Tooltip("The time range after which a new quest come up for the player.")]
+    [SerializeField] private Vector2 newQuestTimerRange = new Vector2(30f, 60f);
 
-    public CharacterData[] AvailableCharacters => availableCharacters;
+    [Header("Data accessible by ID")]
+    [SerializeField] private CharacterData[] characters;
+    [SerializeField] private TaskData[] tasks;
+    [SerializeField] private QuestData[] quests;
 
-    public CharacterData GetCharacterById(int characterId)
+    public CharacterData[] Characters => characters;
+    public TaskData[] Tasks => tasks;
+    public QuestData[] Quests => quests;
+
+    public CharacterData GetCharacterById(int id) { return characters[id]; }
+    public TaskData GetTaskById(int id) { return tasks[id]; }
+    public QuestData GetQuestById(int id) { return quests[id]; }
+
+    public bool TryCharacterGetId(CharacterData character, out int id) { return TryGetIdFrom(characters, character, out id); }
+    public bool TryTaskGetId(TaskData task, out int id) { return TryGetIdFrom(tasks, task, out id); }
+    public bool TryQuestGetId(QuestData quest, out int id) { return TryGetIdFrom(quests, quest, out id); }
+
+    private bool TryGetIdFrom(Array source, object target, out int id)
     {
-        return availableCharacters[characterId];
-    }
-
-    public int GetCharacterId(CharacterData character)
-    {
-        for (int i = 0; i < availableCharacters.Length; i++)
-            if (availableCharacters[i] == character)
-                return i;
-        return 0;
+        id = 0;
+        for (int i = 0; i < source.Length; i++)
+            if (source.GetValue(i) == target)
+            {
+                id = i;
+                return true;
+            }
+        return false;
     }
 }

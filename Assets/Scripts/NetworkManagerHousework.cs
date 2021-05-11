@@ -17,6 +17,8 @@ public class NetworkManagerHousework : NetworkManager
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
     [SerializeField] private GameObject spawnSystemPrefab;
 
+    public static event Action<NetworkConnection> OnServerReadied;
+
     private static NetworkManagerHousework _singleton;
     public static NetworkManagerHousework Singleton
     {
@@ -27,23 +29,23 @@ public class NetworkManagerHousework : NetworkManager
         }
     }
 
-    public static event Action OnClientConnected;
-    public static event Action OnClientDisconnected;
-    public static event Action<NetworkConnection> OnServerReadied;
+    private bool _isGameInProgress = false;
 
     /// <summary>Dictionary of all lobby players, with connectionId as key</summary>
     public Dictionary<int, NetworkLobbyPlayer> LobbyPlayers { get; set; } = new Dictionary<int, NetworkLobbyPlayer>();
 
     /// <summary>Dictionary of all game players, with connectionId as key</summary>
     public Dictionary<int, NetworkGamePlayer> GamePlayers => new Dictionary<int, NetworkGamePlayer>();
-    public bool IsGameInProgress { get; private set; }
+    public bool IsGameInProgress => _isGameInProgress;
+
 
     public override void OnStartServer()
     {
-        //TODO Loading spawnables for server needed or not?
-        //spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
+    }
 
-        IsGameInProgress = false;
+    public override void OnStopServer()
+    {
+        LobbyPlayers.Clear();
     }
 
     public override void OnStartClient()
@@ -53,24 +55,41 @@ public class NetworkManagerHousework : NetworkManager
             NetworkClient.RegisterPrefab(prefab);
     }
 
-    public override void OnClientConnect(NetworkConnection conn)
+    #region Winning and Losing Conditions
+    public void TeamWin()
     {
-        base.OnClientConnect(conn);
-
-        // Add player for any client that is not currently loading a scene, as long as we are still in the lobby. (Only applies to host)
-        if (!clientLoadedScene && !IsGameInProgress)
-            NetworkClient.AddPlayer();
-
-        OnClientConnected?.Invoke();
+        Debug.Log("The whole team has won!".Color("cyan"));
     }
 
-    public override void OnClientDisconnect(NetworkConnection conn)
+    public void PlayerWin(int connectionId)
     {
-        base.OnClientDisconnect(conn);
-
-        OnClientDisconnected?.Invoke();
+        GamePlayers.TryGetValue(connectionId, out var player);
+        Debug.Log($"The player {player.DisplayName} has won!".Color("cyan"));
     }
 
+    public void PlayerDied(int connectionId)
+    {
+        GamePlayers.TryGetValue(connectionId, out var player);
+        Debug.Log($"The player {player.DisplayName} died!".Color("cyan"));
+    }
+
+    public void UpdatedPlayerTaskPoints(int connectionId)
+    {
+        GamePlayers.TryGetValue(connectionId, out var player);
+
+        if (player.TaskPoints > 0.7f) PlayerWin(connectionId);
+
+        //TODO if (player.InsanityPoints >= 1) PlayerDied(connectionId);
+
+        float teamTaskPoints = 0;
+        foreach (NetworkGamePlayer player1 in GamePlayers.Values)
+            teamTaskPoints += player.TaskPoints;
+
+        if (teamTaskPoints >= 0.7f * 4) TeamWin();
+    }
+    #endregion
+
+    #region Lobby and Connection
     public override void OnServerConnect(NetworkConnection conn)
     {
         // Disconnect new client if lobby is full
@@ -83,33 +102,12 @@ public class NetworkManagerHousework : NetworkManager
         }
 
         //Disconnect new client if game is already in progress
-        if (IsGameInProgress)
+        if (_isGameInProgress)
         {
             //TODO Send game in progress message
             Debug.Log("New client disconnected. Game is already in progress.".Color("green"));
             conn.Disconnect();
             return;
-        }
-    }
-
-    public override void OnClientSceneChanged(NetworkConnection conn)
-    {
-        base.OnClientSceneChanged(conn);
-
-        if (NetworkClient.localPlayer == null && !IsGameInProgress)
-            NetworkClient.AddPlayer();
-    }
-
-    public override void OnServerAddPlayer(NetworkConnection conn)
-    {
-        // If inside lobby, spawn and assign LobbyPlayer for new client
-        if (!IsGameInProgress)
-        {
-            NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab);
-            lobbyPlayer.gameObject.name = $"{lobbyPlayerPrefab.name} [connId={conn.connectionId}]";
-            lobbyPlayer.LobbyPlayerPanel.name = $"{lobbyPlayerPrefab.name}Panel [connId={conn.connectionId}]";
-
-            NetworkServer.AddPlayerForConnection(conn, lobbyPlayer.gameObject);
         }
     }
 
@@ -124,16 +122,23 @@ public class NetworkManagerHousework : NetworkManager
         base.OnServerDisconnect(conn);
     }
 
-    public override void OnStopServer()
-    {
-        LobbyPlayers.Clear();
-    }
-
     public override void OnServerReady(NetworkConnection conn)
     {
         base.OnServerReady(conn);
-
         OnServerReadied?.Invoke(conn);
+    }
+
+    public override void OnServerAddPlayer(NetworkConnection conn)
+    {
+        // If inside lobby, spawn and assign LobbyPlayer for new client
+        if (!_isGameInProgress)
+        {
+            NetworkLobbyPlayer lobbyPlayer = Instantiate(lobbyPlayerPrefab);
+            lobbyPlayer.gameObject.name = $"{lobbyPlayerPrefab.name} [connId={conn.connectionId}]";
+            lobbyPlayer.LobbyPlayerPanel.name = $"{lobbyPlayerPrefab.name}Panel [connId={conn.connectionId}]";
+
+            NetworkServer.AddPlayerForConnection(conn, lobbyPlayer.gameObject);
+        }
     }
 
     public override void OnServerSceneChanged(string sceneName)
@@ -171,13 +176,14 @@ public class NetworkManagerHousework : NetworkManager
     [Server]
     public void StartGame()
     {
-        if (!IsGameInProgress && IsReadyToStart())
+        if (!_isGameInProgress && IsReadyToStart())
         {
             Debug.Log("Starting game".Color("cyan"));
-            IsGameInProgress = true;
+            _isGameInProgress = true;
 
             ServerChangeScene(gameScene);
         }
         else return;
     }
+    #endregion
 }

@@ -65,7 +65,15 @@
                     "id": "5ef0ee42-6261-41c3-9148-f13fe054d93c",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "Press"
+                },
+                {
+                    "name": "LeftMouseButtonReleased",
+                    "type": "Button",
+                    "id": "e7696ba5-e463-4f56-8afa-059903523c49",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)"
                 },
                 {
                     "name": "MousePosition",
@@ -183,6 +191,17 @@
                     "action": "WASD",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "c510bfe4-f378-4fc9-aff0-a2399947b771",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardAndMouse",
+                    "action": "LeftMouseButtonReleased",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

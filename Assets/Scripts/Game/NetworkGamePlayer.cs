@@ -25,18 +25,23 @@ public class NetworkGamePlayer : NetworkBehaviour
 
     [SyncVar] private string sync_displayName = "foo";
     [SyncVar] private int sync_characterId;
+    [SyncVar] private float sync_taskPoints = 0;
 
     private InputActions _input;
-    private GameMenu _gameMenu;
     private NavMeshAgent _agent;
+    private TaskPointsBar _taskBar;
 
     private TaskObject _activeTaskObject;
     private TaskMenu _activeTaskMenu;
     private bool _isDoingTask;
 
+    private Vector3 _previousCorner = Vector3.zero;
+
+
     private Queue<TaskWaypoint> _taskWaypoints = new Queue<TaskWaypoint>();
 
     public string DisplayName => sync_displayName;
+    public float TaskPoints => sync_taskPoints;
     public CharacterData Character => gameData.GetCharacterById(sync_characterId);
 
     public struct TaskWaypoint
@@ -55,13 +60,13 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
 
         _input = new InputActions();
-        _input.Game.LeftMouseButton.performed += _ => SelectTaskObject();
+        _input.Game.LeftMouseButton.started += _ => SelectTaskObject();
+        _input.Game.LeftMouseButton.canceled += _ => DestroyTaskMenu();
         _input.Enable();
 
-        _gameMenu = FindObjectOfType<GameMenu>();
-        _gameMenu.SetLocalPlayerColor(gameData.GetCharacterById(sync_characterId).Color);
+        GameManager.Singleton.SetLocalPlayerColor(gameData.GetCharacterById(sync_characterId).Color);
 
-        GameMenu.OnLeaveGameButtonPressed += LeaveGame;
+        GameManager.OnLeaveGameButtonPressed += LeaveGame;
 
         CmdEnableNavAgent();
     }
@@ -75,6 +80,13 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
         displayNameText.text = sync_displayName;
         meshRenderer.material.color = Character.Color;
+
+        _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailableTaskPointsBar();
+    }
+
+    public override void OnStopClient()
+    {
+        _taskBar?.Hide();
     }
 
     public override void OnStartServer()
@@ -91,7 +103,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     public void Update()
     {
         // Run mouse input behavior if we have authority
-        if (hasAuthority)
+        if (hasAuthority && !_activeTaskMenu)
         {
             Ray mouseRay = Camera.main.ScreenPointToRay(_input.Game.MousePosition.ReadValue<Vector2>());
             Debug.DrawRay(mouseRay.origin, mouseRay.direction * maxMouseRayDistance, Color.green);
@@ -125,23 +137,29 @@ public class NetworkGamePlayer : NetworkBehaviour
 
     private void SelectTaskObject()
     {
-        if (!_activeTaskObject) return;
-
-        // TODO Clear old TaskMenu and create new on if another TaskObject is selected as before
-
         // Create new task menu if none is open
-        if (!_activeTaskMenu)
+        if (_activeTaskObject && !_activeTaskMenu)
         {
+            _activeTaskObject.SetHighlighted(true);
+
             // Instantiate TaskMenu at active task object's menu root and rotate it to facie the camera
             _activeTaskMenu = Instantiate(taskMenuPrefab, _activeTaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
             _activeTaskMenu.Initialize(_activeTaskObject);
 
             TaskMenu.OnDoTask += AddTask;
+            TaskMenu.OnPlaceTrap += PlaceTrap;
         }
-        // Clear task menu and unsubcribe from buttons
-        else
+    }
+
+    private void DestroyTaskMenu()
+    {
+        if (_activeTaskMenu)
         {
+            _activeTaskMenu.ExecuteMouseInput();
+
+            // Clear task menu and unsubcribe from buttons
             TaskMenu.OnDoTask -= AddTask;
+            TaskMenu.OnPlaceTrap -= PlaceTrap;
             Destroy(_activeTaskMenu.gameObject);
             _activeTaskMenu = null;
         }
@@ -151,7 +169,11 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
         Debug.Log($"Added Task {taskObject.TaskData.TaskName}".Color("yellow"));
         AddTaskWaypoint(taskObject.TaskPosition, taskObject.TaskData.TaskName);
-        Debug.Log(taskObject.TaskPosition);
+    }
+
+    private void PlaceTrap(TaskObject taskObject)
+    {
+        Debug.Log($"Placed Trap {taskObject.TaskData.TaskName}".Color("yellow"));
     }
 
     [Command]
@@ -179,7 +201,7 @@ public class NetworkGamePlayer : NetworkBehaviour
             taskSchedule += $"{i + 1}. {scheduledTaskNames[i]} \n";
         }
 
-        _gameMenu.TaskScheduleText.text = taskSchedule;
+        // GameManager.Singleton.TaskScheduleText.text = taskSchedule;
     }
 
     [ServerCallback]
@@ -199,13 +221,38 @@ public class NetworkGamePlayer : NetworkBehaviour
                 _agent.SetDestination(_taskWaypoints.Peek().Position);
             }
         }
+
+        //TODO Task pathing
+        foreach (var corner in _agent.path.corners)
+        {
+            Debug.DrawLine(_previousCorner, corner, Color.blue, 20);
+            _previousCorner = corner;
+        }
+    }
+
+    [Server]
+    private void CompleteTask()
+    {
+        //TODO Copleting tasks and adding their TaskPoint value
+        sync_taskPoints += 0.1f;
+        NetworkManagerHousework.Singleton.UpdatedPlayerTaskPoints(connectionToClient.connectionId);
+        RpcUpdateTaskPoints(sync_taskPoints);
+    }
+
+    [ClientRpc]
+    private void RpcUpdateTaskPoints(float taskPoints)
+    {
+        _taskBar?.SetTaskPoints(taskPoints);
     }
 
     private IEnumerator DoTask()
     {
         _isDoingTask = true;
-        // TODO Task wait time
+        //TODO Task wait time
         yield return new WaitForSeconds(3);
+
+        //TODO Complete task
+        CompleteTask();
         _isDoingTask = false;
     }
 

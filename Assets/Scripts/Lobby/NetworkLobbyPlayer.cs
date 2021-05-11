@@ -171,7 +171,7 @@ public class NetworkLobbyPlayer : NetworkBehaviour
             GridLayoutGroup buttonGridContainer = _currentCharacterSelection.GetComponentInChildren<GridLayoutGroup>();
 
             // Poppulate grid with a button for each available character
-            for (int i = 0; i < gameData.AvailableCharacters.Length; i++)
+            for (int i = 0; i < gameData.Characters.Length; i++)
                 Instantiate(characterSelectionButtonPrefab, buttonGridContainer.transform).SetCharacter(gameData.GetCharacterById(i));
 
             CharacterSelectionButton.OnCharacterSelected += CharacterSelected;
@@ -189,7 +189,8 @@ public class NetworkLobbyPlayer : NetworkBehaviour
 
     private void CharacterSelected(CharacterData character)
     {
-        CmdSetCharacterById(gameData.GetCharacterId(character));
+        if (gameData.TryCharacterGetId(character, out int characterId))
+            CmdSetCharacterById(characterId);
         CloseCharacterSelection();
     }
 

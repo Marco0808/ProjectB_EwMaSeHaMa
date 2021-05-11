@@ -5,10 +5,12 @@ using Mirror;
 using NaughtyAttributes;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class TaskObject : MonoBehaviour
+public class TaskObject : NetworkBehaviour
 {
     [SerializeField, OnValueChanged("UpdateTaskObject")] private TaskData taskData;
     [SerializeField] private Transform taskMenuRoot;
+
+    [SyncVar] private bool sync_isTrapActive;
 
     private SpriteRenderer _spriteRenderer;
     private Collider _collider;

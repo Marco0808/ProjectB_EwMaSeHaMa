@@ -78,7 +78,15 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""id"": ""5ef0ee42-6261-41c3-9148-f13fe054d93c"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """"
+                    ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""LeftMouseButtonReleased"",
+                    ""type"": ""Button"",
+                    ""id"": ""e7696ba5-e463-4f56-8afa-059903523c49"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=1)""
                 },
                 {
                     ""name"": ""MousePosition"",
@@ -196,6 +204,17 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""action"": ""WASD"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c510bfe4-f378-4fc9-aff0-a2399947b771"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardAndMouse"",
+                    ""action"": ""LeftMouseButtonReleased"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -227,6 +246,7 @@ public class @InputActions : IInputActionCollection, IDisposable
         m_Game = asset.FindActionMap("Game", throwIfNotFound: true);
         m_Game_CameraGrab = m_Game.FindAction("CameraGrab", throwIfNotFound: true);
         m_Game_LeftMouseButton = m_Game.FindAction("LeftMouseButton", throwIfNotFound: true);
+        m_Game_LeftMouseButtonReleased = m_Game.FindAction("LeftMouseButtonReleased", throwIfNotFound: true);
         m_Game_MousePosition = m_Game.FindAction("MousePosition", throwIfNotFound: true);
         m_Game_WASD = m_Game.FindAction("WASD", throwIfNotFound: true);
     }
@@ -321,6 +341,7 @@ public class @InputActions : IInputActionCollection, IDisposable
     private IGameActions m_GameActionsCallbackInterface;
     private readonly InputAction m_Game_CameraGrab;
     private readonly InputAction m_Game_LeftMouseButton;
+    private readonly InputAction m_Game_LeftMouseButtonReleased;
     private readonly InputAction m_Game_MousePosition;
     private readonly InputAction m_Game_WASD;
     public struct GameActions
@@ -329,6 +350,7 @@ public class @InputActions : IInputActionCollection, IDisposable
         public GameActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @CameraGrab => m_Wrapper.m_Game_CameraGrab;
         public InputAction @LeftMouseButton => m_Wrapper.m_Game_LeftMouseButton;
+        public InputAction @LeftMouseButtonReleased => m_Wrapper.m_Game_LeftMouseButtonReleased;
         public InputAction @MousePosition => m_Wrapper.m_Game_MousePosition;
         public InputAction @WASD => m_Wrapper.m_Game_WASD;
         public InputActionMap Get() { return m_Wrapper.m_Game; }
@@ -346,6 +368,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @LeftMouseButton.started -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
                 @LeftMouseButton.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
                 @LeftMouseButton.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButton;
+                @LeftMouseButtonReleased.started -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButtonReleased;
+                @LeftMouseButtonReleased.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButtonReleased;
+                @LeftMouseButtonReleased.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnLeftMouseButtonReleased;
                 @MousePosition.started -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
                 @MousePosition.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
                 @MousePosition.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnMousePosition;
@@ -362,6 +387,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @LeftMouseButton.started += instance.OnLeftMouseButton;
                 @LeftMouseButton.performed += instance.OnLeftMouseButton;
                 @LeftMouseButton.canceled += instance.OnLeftMouseButton;
+                @LeftMouseButtonReleased.started += instance.OnLeftMouseButtonReleased;
+                @LeftMouseButtonReleased.performed += instance.OnLeftMouseButtonReleased;
+                @LeftMouseButtonReleased.canceled += instance.OnLeftMouseButtonReleased;
                 @MousePosition.started += instance.OnMousePosition;
                 @MousePosition.performed += instance.OnMousePosition;
                 @MousePosition.canceled += instance.OnMousePosition;
@@ -390,6 +418,7 @@ public class @InputActions : IInputActionCollection, IDisposable
     {
         void OnCameraGrab(InputAction.CallbackContext context);
         void OnLeftMouseButton(InputAction.CallbackContext context);
+        void OnLeftMouseButtonReleased(InputAction.CallbackContext context);
         void OnMousePosition(InputAction.CallbackContext context);
         void OnWASD(InputAction.CallbackContext context);
     }
