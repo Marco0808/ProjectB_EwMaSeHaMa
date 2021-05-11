@@ -25,6 +25,7 @@ public class QuestPanel : MonoBehaviour
 
         titleText.text = quest.Title;
         captionText.text = quest.Caption;
+        taskPointsText.text = quest.TaskPoints.ToString();
         completeInOrderIndicator.SetActive(quest.CompleteTasksInOrder);
 
         foreach (TaskData task in quest.Tasks)

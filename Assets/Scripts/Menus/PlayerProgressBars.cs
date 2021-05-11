@@ -35,7 +35,8 @@ public class PlayerProgressBars : MonoBehaviour
         {
             bar.MaxLenght = maxTaskBarLenght;
             bar.PointBar.rectTransform.sizeDelta = new Vector2(maxTaskBarLenght, bar.PointBar.rectTransform.sizeDelta.y);
-            bar.GoalIndicator.rectTransform.localPosition = new Vector2(maxTaskBarLenght, 0);
+            RectTransform goalTrans = bar.GoalIndicator.rectTransform;
+            goalTrans.localPosition = new Vector2(maxTaskBarLenght - goalTrans.sizeDelta.x / 2, 0);
         }
 
         UpdateTaskBarBackground();
