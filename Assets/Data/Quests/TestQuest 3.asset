@@ -10,9 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
-  m_Name: New QuestData
+  m_Name: TestQuest 3
   m_EditorClassIdentifier: 
-  title: Quest
+  title: Chillen
   caption: Lorem ipsum dolor sit amet consectetur adipisicing elit.
+  taskPoints: 100
   completeTasksInOrder: 1
-  tasksToComplete: []
+  tasksToComplete:
+  - {fileID: 11400000, guid: 3664038cf56ea4a41a157b1f9f476c2b, type: 2}
+  - {fileID: 11400000, guid: eff09612227f2d54990997109f19f02a, type: 2}

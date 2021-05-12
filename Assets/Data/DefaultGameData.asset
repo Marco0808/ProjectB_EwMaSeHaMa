@@ -13,10 +13,18 @@ MonoBehaviour:
   m_Name: DefaultGameData
   m_EditorClassIdentifier: 
   newQuestTimerRange: {x: 30, y: 60}
+  trapTaskDelayTime: 5
   characters:
   - {fileID: 11400000, guid: f13073f3cc8007c4e8b134c7a5e9e6fd, type: 2}
   - {fileID: 11400000, guid: ef7e03a36e7bc1c479ab7bbf3597af4d, type: 2}
   - {fileID: 11400000, guid: 33aa8cb10572f6b40994025705f2adf4, type: 2}
   - {fileID: 11400000, guid: 73eac123aacae09418d2dc8ad7b0c774, type: 2}
-  tasks: []
-  quests: []
+  tasks:
+  - {fileID: 11400000, guid: 3664038cf56ea4a41a157b1f9f476c2b, type: 2}
+  - {fileID: 11400000, guid: eff09612227f2d54990997109f19f02a, type: 2}
+  - {fileID: 11400000, guid: 8b62867cc30edd04a9653e6f37c53539, type: 2}
+  quests:
+  - {fileID: 11400000, guid: d715b3e3397bdb7448ed37e62295bd6e, type: 2}
+  - {fileID: 11400000, guid: eb983605b15b7494ab619d5cee20ce97, type: 2}
+  - {fileID: 11400000, guid: f0b87db3718e1704eb5003ca74dd5a1b, type: 2}
+  - {fileID: 11400000, guid: 7684fbbb93fcf8140992dbcaaeb0f829, type: 2}
