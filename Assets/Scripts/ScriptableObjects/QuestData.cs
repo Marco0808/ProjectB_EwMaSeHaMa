@@ -4,7 +4,6 @@ using UnityEngine;
 using NaughtyAttributes;
 
 [CreateAssetMenu(fileName = "New QuestData", menuName = "Housework/Quest Data")]
-
 public class QuestData : ScriptableObject
 {
     [SerializeField] private string title = "Quest";
@@ -17,5 +16,5 @@ public class QuestData : ScriptableObject
     public string Caption => caption;
     public int TaskPoints => taskPoints;
     public bool CompleteTasksInOrder => completeTasksInOrder;
-    public TaskData[] Tasks => tasksToComplete;
+    public TaskData[] Tasks => tasksToComplete;  
 }

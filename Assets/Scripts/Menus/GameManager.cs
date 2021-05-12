@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour
         color.a = 1;
         localPlayerColor.color = color;
     }
+
     public void LeaveGamePressed()
     {
         OnLeaveGameButtonPressed?.Invoke();

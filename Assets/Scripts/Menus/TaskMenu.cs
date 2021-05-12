@@ -51,7 +51,7 @@ public class TaskMenu : MonoBehaviour
     public void Initialize(TaskObject taskObject)
     {
         _taskObject = taskObject;
-        taskNameText.text = _taskObject.TaskData.TaskName;
+        taskNameText.text = _taskObject.Task.TaskName;
     }
 
     public void ExecuteMouseInput()

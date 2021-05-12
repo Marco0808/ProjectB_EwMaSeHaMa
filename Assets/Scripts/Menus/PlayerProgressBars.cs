@@ -18,6 +18,7 @@ public class PlayerProgressBars : MonoBehaviour
 
     private void Start()
     {
+        UpdateTaskBarSize();
         foreach (TaskPointsBar taskBar in taskPointBars) taskBar.Hide();
     }
 

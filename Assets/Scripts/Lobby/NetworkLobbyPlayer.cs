@@ -189,7 +189,7 @@ public class NetworkLobbyPlayer : NetworkBehaviour
 
     private void CharacterSelected(CharacterData character)
     {
-        if (gameData.TryCharacterGetId(character, out int characterId))
+        if (gameData.TryGetCharacterId(character, out int characterId))
             CmdSetCharacterById(characterId);
         CloseCharacterSelection();
     }

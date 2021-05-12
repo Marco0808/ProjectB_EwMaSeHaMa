@@ -4,7 +4,6 @@ using UnityEngine;
 using NaughtyAttributes;
 
 [CreateAssetMenu(fileName = "New TaskData", menuName = "Housework/Task Data")]
-
 public class TaskData : ScriptableObject
 {
     [SerializeField] private string taskName = "Task";
@@ -12,6 +11,8 @@ public class TaskData : ScriptableObject
     [SerializeField] private float workingTime = 3;
     [SerializeField, ShowAssetPreview] private Sprite objectSprite;
     [SerializeField, ShowAssetPreview] private Sprite icon;
+
+    public TaskObject taskObject { get; set; }
 
     public string TaskName => taskName;
     public int MaxPlayersAtTask => maxPlayersAtTask;

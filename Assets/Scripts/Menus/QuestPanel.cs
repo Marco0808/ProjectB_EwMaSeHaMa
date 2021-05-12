@@ -35,12 +35,14 @@ public class QuestPanel : MonoBehaviour
         }
     }
 
-    public void CompleteTask(TaskData task)
+    public bool TryCompleteTask(TaskData task)
     {
         if (_taskIcons.TryGetValue(task, out TaskIcon taskIcon))
         {
             //TODO Complete task and check if whole quest is completet (or better do this on server?)
             taskIcon.SetCompleted(true);
+            return true;
         }
+        return false;
     }
 }

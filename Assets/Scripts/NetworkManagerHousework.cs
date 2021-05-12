@@ -35,7 +35,7 @@ public class NetworkManagerHousework : NetworkManager
     public Dictionary<int, NetworkLobbyPlayer> LobbyPlayers { get; set; } = new Dictionary<int, NetworkLobbyPlayer>();
 
     /// <summary>Dictionary of all game players, with connectionId as key</summary>
-    public Dictionary<int, NetworkGamePlayer> GamePlayers => new Dictionary<int, NetworkGamePlayer>();
+    public Dictionary<int, NetworkGamePlayer> GamePlayers { get; set; } = new Dictionary<int, NetworkGamePlayer>();
     public bool IsGameInProgress => _isGameInProgress;
 
 
@@ -75,17 +75,19 @@ public class NetworkManagerHousework : NetworkManager
 
     public void UpdatedPlayerTaskPoints(int connectionId)
     {
-        GamePlayers.TryGetValue(connectionId, out var player);
+        if (GamePlayers.TryGetValue(connectionId, out var player))
+        {
+            if (player.TaskPoints > 0.7f) PlayerWin(connectionId);
 
-        if (player.TaskPoints > 0.7f) PlayerWin(connectionId);
+            //TODO if (player.InsanityPoints >= 1) PlayerDied(connectionId);
 
-        //TODO if (player.InsanityPoints >= 1) PlayerDied(connectionId);
+            float teamTaskPoints = 0;
+            foreach (NetworkGamePlayer p in GamePlayers.Values)
+                teamTaskPoints += p.TaskPoints;
 
-        float teamTaskPoints = 0;
-        foreach (NetworkGamePlayer player1 in GamePlayers.Values)
-            teamTaskPoints += player.TaskPoints;
+            if (teamTaskPoints >= 0.7f * 4) TeamWin();
+        }
 
-        if (teamTaskPoints >= 0.7f * 4) TeamWin();
     }
     #endregion
 

@@ -8,14 +8,18 @@ public class TaskPointsBar : MonoBehaviour
     [SerializeField] private Image pointBar;
     [SerializeField] private Image goalIndicator;
 
+    private float _maxLenght;
+
     public Image PointBar => pointBar;
     public Image GoalIndicator => goalIndicator;
-    public float MaxLenght { get; set; }
+    public float MaxLenght { get => _maxLenght; set => _maxLenght = value; }
 
-    public void Show(Color barColor)
+    public void Initialize(Color barColor)
     {
         pointBar.color = barColor;
         goalIndicator.color = barColor;
+
+        SetTaskPoints(0);
         gameObject.SetActive(true);
     }
 
@@ -27,6 +31,6 @@ public class TaskPointsBar : MonoBehaviour
     public void SetTaskPoints(float taskBarValue)
     {
         RectTransform taskBarTrans = pointBar.rectTransform;
-        taskBarTrans.sizeDelta = new Vector2(MaxLenght * taskBarValue, taskBarTrans.sizeDelta.y);
+        taskBarTrans.sizeDelta = new Vector2(_maxLenght * taskBarValue, taskBarTrans.sizeDelta.y);
     }
 }

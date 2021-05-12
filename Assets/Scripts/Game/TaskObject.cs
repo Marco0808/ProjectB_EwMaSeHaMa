@@ -2,33 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using NaughtyAttributes;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class TaskObject : NetworkBehaviour
 {
-    [SerializeField, OnValueChanged("UpdateTaskObject")] private TaskData taskData;
+    [SerializeField] private GameData gameData;
     [SerializeField] private Transform taskMenuRoot;
 
     [SyncVar] private bool sync_isTrapActive;
 
+    private TaskData _task;
     private SpriteRenderer _spriteRenderer;
     private Collider _collider;
 
-    public TaskData TaskData => taskData;
+    public TaskData Task => _task;
     public Transform TaskMenuRoot => taskMenuRoot;
     public Vector3 TaskPosition => transform.position;
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
         _collider = GetComponent<BoxCollider>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _task = GetComponent<TaskObjectUpdater>().Task;
     }
 
     private void Start()
     {
-        _spriteRenderer.sprite = taskData.ObjectSprite;
+        _task.taskObject = this;
+
+        _spriteRenderer.sprite = _task.ObjectSprite;
         StartCoroutine(ResetCollider());
+    }
+
+    [Server]
+    public void ActivateTrap()
+    {
+        sync_isTrapActive = true;
     }
 
     public void SetHighlighted(bool isHighlighted)
@@ -44,24 +53,11 @@ public class TaskObject : NetworkBehaviour
         _spriteRenderer.color = color;
     }
 
-    [Button("Update Task Object", EButtonEnableMode.Always)]
-    private void UpdateTaskObject() => GetComponent<SpriteRenderer>().sprite = taskData.ObjectSprite;
-
     IEnumerator ResetCollider()
     {
         if (_collider) Destroy(_collider);
         yield return null;
         _collider = gameObject.AddComponent<BoxCollider>();
         _collider.isTrigger = true;
-    }
-
-    private void OnMouseEnter()
-    {
-        
-    }
-
-    private void OnMouseExit()
-    {
-        
     }
 }

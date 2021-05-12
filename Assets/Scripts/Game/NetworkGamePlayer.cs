@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,10 +17,15 @@ public class NetworkGamePlayer : NetworkBehaviour
     [Header("References")]
     [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text displayNameText;
-    [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
     [Header("Prefabs")]
     [SerializeField] private TaskMenu taskMenuPrefab;
+
+    [Header("Waypoint Path")]
+    [SerializeField] private Material taskPathMat;
+    [SerializeField] private Material trapPathMat;
+    [SerializeField] private LineRenderer waypointPathPrefab;
 
     [SyncVar] private string sync_displayName = "foo";
     [SyncVar] private int sync_characterId;
@@ -34,11 +38,12 @@ public class NetworkGamePlayer : NetworkBehaviour
     private TaskObject _activeTaskObject;
     private TaskMenu _activeTaskMenu;
     private bool _isDoingTask;
+    private float _questCooldown;
 
-    private Vector3 _previousCorner = Vector3.zero;
-
-
+    private List<QuestData> _activeQuests = new List<QuestData>();
+    private Dictionary<QuestData, QuestPanel> _activeQuestPanels = new Dictionary<QuestData, QuestPanel>();
     private Queue<TaskWaypoint> _taskWaypoints = new Queue<TaskWaypoint>();
+    private Dictionary<int, GameObject> _waypointPaths = new Dictionary<int, GameObject>();
 
     public string DisplayName => sync_displayName;
     public float TaskPoints => sync_taskPoints;
@@ -46,19 +51,20 @@ public class NetworkGamePlayer : NetworkBehaviour
 
     public struct TaskWaypoint
     {
-        public TaskWaypoint(Vector3 position, string taskName)
+        public TaskWaypoint(Vector3 position, int taskId, bool placeTrap)
         {
             Position = position;
-            TaskName = taskName;
+            TaskId = taskId;
+            PlaceTrap = placeTrap;
         }
 
         public Vector3 Position { get; private set; }
-        public string TaskName { get; private set; }
+        public int TaskId { get; private set; }
+        public bool PlaceTrap { get; private set; }
     }
 
     public override void OnStartAuthority()
     {
-
         _input = new InputActions();
         _input.Game.LeftMouseButton.started += _ => SelectTaskObject();
         _input.Game.LeftMouseButton.canceled += _ => DestroyTaskMenu();
@@ -79,9 +85,10 @@ public class NetworkGamePlayer : NetworkBehaviour
     public override void OnStartClient()
     {
         displayNameText.text = sync_displayName;
-        meshRenderer.material.color = Character.Color;
+        spriteRenderer.color = Character.Color;
 
         _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailableTaskPointsBar();
+        _taskBar.Initialize(Character.Color);
     }
 
     public override void OnStopClient()
@@ -128,6 +135,30 @@ public class NetworkGamePlayer : NetworkBehaviour
         }
     }
 
+    public List<TaskData> GetTasksFromActiveQuests()
+    {
+        List<TaskData> tasks = new List<TaskData>();
+        foreach (QuestData quest in _activeQuests)
+            foreach (TaskData task in quest.Tasks)
+                tasks.Add(task);
+
+        return tasks;
+    }
+
+    public bool TryFindQuestOfTask(TaskData taskToFind, out QuestData activeQuest)
+    {
+        foreach (QuestData quest in _activeQuests)
+            foreach (TaskData task in quest.Tasks)
+                if (task == taskToFind)
+                {
+                    activeQuest = quest;
+                    return true;
+                }
+
+        activeQuest = null;
+        return false;
+    }
+
     private bool TryGetTaskObjectFromHit(RaycastHit hit, out TaskObject taskObject)
     {
         taskObject = null;
@@ -146,8 +177,8 @@ public class NetworkGamePlayer : NetworkBehaviour
             _activeTaskMenu = Instantiate(taskMenuPrefab, _activeTaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
             _activeTaskMenu.Initialize(_activeTaskObject);
 
-            TaskMenu.OnDoTask += AddTask;
-            TaskMenu.OnPlaceTrap += PlaceTrap;
+            TaskMenu.OnDoTask += AddTaskWaypoint;
+            TaskMenu.OnPlaceTrap += AddTrapWaypoint;
         }
     }
 
@@ -158,85 +189,121 @@ public class NetworkGamePlayer : NetworkBehaviour
             _activeTaskMenu.ExecuteMouseInput();
 
             // Clear task menu and unsubcribe from buttons
-            TaskMenu.OnDoTask -= AddTask;
-            TaskMenu.OnPlaceTrap -= PlaceTrap;
+            TaskMenu.OnDoTask -= AddTaskWaypoint;
+            TaskMenu.OnPlaceTrap -= AddTrapWaypoint;
             Destroy(_activeTaskMenu.gameObject);
             _activeTaskMenu = null;
         }
     }
 
-    private void AddTask(TaskObject taskObject)
+    [Client]
+    private void AddTaskWaypoint(TaskObject taskObject)
     {
-        Debug.Log($"Added Task {taskObject.TaskData.TaskName}".Color("yellow"));
-        AddTaskWaypoint(taskObject.TaskPosition, taskObject.TaskData.TaskName);
+        Debug.Log($"Added Task {taskObject.Task.TaskName}".Color("yellow"));
+
+        if (gameData.TryGetTaskId(taskObject.Task, out int taskId))
+            CmdTryAddWaypoint(taskObject.TaskPosition, taskId, false);
     }
 
-    private void PlaceTrap(TaskObject taskObject)
+    [Client]
+    private void AddTrapWaypoint(TaskObject taskObject)
     {
-        Debug.Log($"Placed Trap {taskObject.TaskData.TaskName}".Color("yellow"));
+        Debug.Log($"Placed Trap {taskObject.Task.TaskName}".Color("yellow"));
+
+        if (gameData.TryGetTaskId(taskObject.Task, out int taskId))
+            CmdTryAddWaypoint(taskObject.TaskPosition, taskId, true);
     }
 
     [Command]
-    private void AddTaskWaypoint(Vector3 position, string taskName)
+    private void CmdTryAddWaypoint(Vector3 targetPos, int taskId, bool placeTrap)
     {
-        _taskWaypoints.Enqueue(new TaskWaypoint(position, taskName));
-        UpdateTaskSchedule(connectionToClient, GetCurrentTaskSchedule());
-    }
+        // Dont Add Waypoint if is already waypoint
+        foreach (var item in _taskWaypoints)
+            if (item.TaskId == taskId) return;
 
-    private string[] GetCurrentTaskSchedule()
-    {
-        List<string> currentTaskNames = new List<string>();
-        foreach (var waypoint in _taskWaypoints)
-            currentTaskNames.Add(waypoint.TaskName);
+        _taskWaypoints.Enqueue(new TaskWaypoint(targetPos, taskId, placeTrap));
 
-        return currentTaskNames.ToArray();
+        // Calculate path no new waypoint
+        NavMeshPath path = new NavMeshPath();
+        TaskWaypoint[] taskWaypoints = _taskWaypoints.ToArray();
+        Vector3 startPosition = taskWaypoints.Length > 1 ? taskWaypoints[taskWaypoints.Length - 2].Position : _agent.transform.position;
+        NavMesh.CalculatePath(startPosition, targetPos, NavMesh.AllAreas, path);
+
+        RpcSpawnWaypointPath(connectionToClient, path.corners, taskId, placeTrap);
     }
 
     [TargetRpc]
-    private void UpdateTaskSchedule(NetworkConnection target, string[] scheduledTaskNames)
+    private void RpcSpawnWaypointPath(NetworkConnection target, Vector3[] pathCorners, int taskId, bool placeTrap)
     {
-        string taskSchedule = "Task Schedule: \n";
-        for (int i = 0; i < scheduledTaskNames.Length; i++)
-        {
-            taskSchedule += $"{i + 1}. {scheduledTaskNames[i]} \n";
-        }
+        LineRenderer line = Instantiate(waypointPathPrefab);
+        line.positionCount = pathCorners.Length;
+        line.SetPositions(pathCorners);
+        line.material = placeTrap ? trapPathMat : taskPathMat;
 
-        // GameManager.Singleton.TaskScheduleText.text = taskSchedule;
+        _waypointPaths.Add(taskId, line.gameObject);
+    }
+
+    [TargetRpc]
+    private void RpcRemoveWaypoint(NetworkConnection target, int taskId)
+    {
+        _waypointPaths.TryGetValue(taskId, out GameObject waypointPath);
+        Destroy(waypointPath);
+        _waypointPaths.Remove(taskId);
     }
 
     [ServerCallback]
     private void FixedUpdate()
     {
-        if (_taskWaypoints.Count > 0 && _agent.remainingDistance < 1f)
+        // Getting quests
+        if (_questCooldown >= 0)
         {
-            if (Vector3.Distance(_agent.transform.position, _taskWaypoints.Peek().Position) < 2f)
+            _questCooldown -= Time.fixedDeltaTime;
+            if (_questCooldown <= 0)
             {
-
-                _taskWaypoints.Dequeue();
-                UpdateTaskSchedule(connectionToClient, GetCurrentTaskSchedule());
-                StartCoroutine(DoTask());
-            }
-            else if (!_isDoingTask)
-            {
-                _agent.SetDestination(_taskWaypoints.Peek().Position);
+                if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData newQuest))
+                    AddQuest(newQuest);
+                _questCooldown = Random.Range(gameData.NewQuestTimerRange.x, gameData.NewQuestTimerRange.y);
             }
         }
 
-        //TODO Task pathing
-        foreach (var corner in _agent.path.corners)
+        // Movement
+        if (_taskWaypoints.Count > 0 && _agent.remainingDistance < 1f)
         {
-            Debug.DrawLine(_previousCorner, corner, Color.blue, 20);
-            _previousCorner = corner;
+            if (Vector3.Distance(_agent.transform.position, _taskWaypoints.Peek().Position) < 3f)
+            {
+                // Task waypoint reached, remove waypoint from list and client
+                TaskWaypoint waypoint = _taskWaypoints.Dequeue();
+
+                RpcRemoveWaypoint(connectionToClient, waypoint.TaskId);
+
+                StartCoroutine(TryDoTask(waypoint.TaskId));
+            }
+            else if (!_isDoingTask)
+            {
+                NavMesh.SamplePosition(_taskWaypoints.Peek().Position, out NavMeshHit hit, 10, NavMesh.AllAreas);
+                _agent.SetDestination(hit.position);
+            }
         }
     }
 
     [Server]
-    private void CompleteTask()
+    private void CompleteTask(int taskId)
     {
         //TODO Copleting tasks and adding their TaskPoint value
+        TaskData task = gameData.GetTaskById(taskId);
+        if (TryFindQuestOfTask(task, out QuestData quest) && _activeQuestPanels.TryGetValue(quest, out QuestPanel questPanel))
+            questPanel.TryCompleteTask(task);
+
         sync_taskPoints += 0.1f;
+
         NetworkManagerHousework.Singleton.UpdatedPlayerTaskPoints(connectionToClient.connectionId);
         RpcUpdateTaskPoints(sync_taskPoints);
+    }
+
+    [Server]
+    private void CompleteTrap(int taskId)
+    {
+        gameData.GetTaskById(taskId).taskObject.ActivateTrap();
     }
 
     [ClientRpc]
@@ -245,21 +312,33 @@ public class NetworkGamePlayer : NetworkBehaviour
         _taskBar?.SetTaskPoints(taskPoints);
     }
 
-    private IEnumerator DoTask()
+    private void AddQuest(QuestData quest)
     {
-        _isDoingTask = true;
-        //TODO Task wait time
-        yield return new WaitForSeconds(3);
+        _activeQuests.Add(quest);
+        QuestPanel questPanel = GameManager.Singleton.QuestMenu.AddQuest(quest);
+        _activeQuestPanels.Add(quest, questPanel);
 
-        //TODO Complete task
-        CompleteTask();
+        Debug.Log("ADD QUEST");
+    }
+
+    private IEnumerator TryDoTask(int taskId)
+    {
+
+
+        _isDoingTask = true;
+        yield return new WaitForSeconds(gameData.GetTaskById(taskId).WorkingTime);
+
+        CompleteTask(taskId);
         _isDoingTask = false;
     }
 
-    [Command]
-    private void CmdSetPlayerDestination(Vector3 position)
+    private IEnumerator TryPlaceTrap(int taskId)
     {
-        _agent.destination = position;
+        _isDoingTask = true;
+        yield return new WaitForSeconds(gameData.GetTaskById(taskId).WorkingTime);
+
+        CompleteTrap(taskId);
+        _isDoingTask = false;
     }
 
     [Command]
