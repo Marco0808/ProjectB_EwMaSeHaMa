@@ -15,6 +15,6 @@ MonoBehaviour:
   characterName: Omi
   backgroundStory: Lorem ipsum dolor sit amet consectetur adipisicing elit.
   color: {r: 1, g: 0, b: 0, a: 1}
-  portrait: {fileID: 21300000, guid: 88578e1351c901147aba49117c12f7c6, type: 3}
+  portrait: {fileID: 21300000, guid: 359e6ec291e155143aef84ec299c615f, type: 3}
   playerCharacter: {fileID: 0}
   playerAnimatorController: {fileID: 9100000, guid: f44d043565d36f649b20659b163969f0, type: 2}

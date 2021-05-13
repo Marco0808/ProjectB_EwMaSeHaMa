@@ -15,6 +15,6 @@ MonoBehaviour:
   characterName: Bossfrau
   backgroundStory: Lorem ipsum dolor sit amet consectetur adipisicing elit.
   color: {r: 0.764151, g: 0.082903184, b: 0.75005597, a: 1}
-  portrait: {fileID: 21300000, guid: c927e886c997c3847a0b1054a5ef8fc7, type: 3}
+  portrait: {fileID: 21300000, guid: 372d61a9d2131034cb7fbd9855f41364, type: 3}
   playerCharacter: {fileID: 0}
   playerAnimatorController: {fileID: 9100000, guid: 9fceb1966bd65b448bc6c09d7b4b17fb, type: 2}

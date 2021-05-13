@@ -15,6 +15,6 @@ MonoBehaviour:
   characterName: Punky
   backgroundStory: Lorem ipsum dolor sit amet consectetur adipisicing elit.
   color: {r: 0, g: 0.32234812, b: 1, a: 1}
-  portrait: {fileID: 21300000, guid: 4054d80c37432bf4faf12c70e1854fc6, type: 3}
+  portrait: {fileID: 21300000, guid: 05c6527f98870ef458fe93a3c10af568, type: 3}
   playerCharacter: {fileID: 0}
   playerAnimatorController: {fileID: 9100000, guid: 37d027f94b16b07409fa906fdb767ad9, type: 2}
