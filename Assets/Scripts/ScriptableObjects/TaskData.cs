@@ -7,7 +7,7 @@ using NaughtyAttributes;
 public class TaskData : ScriptableObject
 {
     [SerializeField] private string taskName = "Task";
-    [SerializeField] private int maxPlayersAtTask = 2;
+    [SerializeField, Range(1, 2)] private int maxPlayersAtTask = 2;
     [SerializeField] private float workingTime = 3;
     [SerializeField, ShowAssetPreview] private Sprite objectSprite;
     [SerializeField, ShowAssetPreview] private Sprite icon;

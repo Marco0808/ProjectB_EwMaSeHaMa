@@ -61,15 +61,8 @@ public class TaskPopup : MonoBehaviour
         if (mousePoint.y > _menuCenterPoint.y && _taskObject)
         {
             if (mousePoint.x < _menuCenterPoint.x)
-            {
-                Debug.Log("Trap Button Activated");
                 OnPlaceTrap?.Invoke(_taskObject);
-            }
-            else
-            {
-                Debug.Log("Task Button Activated");
-                OnDoTask?.Invoke(_taskObject);
-            }
+            else OnDoTask?.Invoke(_taskObject);
         }
     }
 

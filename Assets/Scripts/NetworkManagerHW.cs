@@ -92,7 +92,6 @@ public class NetworkManagerHW : NetworkManager
             if (player.QuestPoints >= gameData.MaxQuestPoints)
                 PlayerWin(connectionId);
         }
-
     }
 
     public void UpdatedPlayerInsanityPoints(int connectionId)

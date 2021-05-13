@@ -18,7 +18,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text displayNameText;
     [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Animator animator; 
+    [SerializeField] private Animator animator;
 
     [Header("Prefabs")]
     [SerializeField] private TaskPopup taskPopupPrefab;
@@ -39,9 +39,14 @@ public class NetworkGamePlayer : NetworkBehaviour
 
     private TaskObject _activeTaskObject;
     private TaskPopup _activeTaskPopup;
+    private TaskTimeIndicator _activeTaskTimeIndicator;
     private EncounterPopup _activeEncounterPopup;
+    private int? _encounteredPlayer;
+    private Encounter _activeEncounter;
     private bool _isDoingTask;
     private float _questCooldown;
+
+    private Coroutine _taskCoroutine;
 
     private List<QuestData> _activeQuests = new List<QuestData>();
     private Dictionary<QuestData, QuestPanel> _activeQuestPanels = new Dictionary<QuestData, QuestPanel>();
@@ -67,6 +72,9 @@ public class NetworkGamePlayer : NetworkBehaviour
         public bool PlaceTrap { get; private set; }
     }
 
+    public enum EncounterDecision { None, Conflict, Cooperate }
+
+    #region Callbacks & Setup
     public override void OnStartAuthority()
     {
         _input = new InputActions();
@@ -81,26 +89,20 @@ public class NetworkGamePlayer : NetworkBehaviour
         CmdEnableNavAgent();
     }
 
-    public override void OnStopAuthority()
-    {
-        _input.Disable();
-    }
+    public override void OnStopAuthority() => _input.Disable();
 
     public override void OnStartClient()
     {
         displayNameText.text = sync_displayName;
         //spriteRenderer.color = Character.Color;
-        
+
         animator.runtimeAnimatorController = Character.PlayerAnimatorController;
 
         _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailablequestPointsBar();
         _taskBar.Initialize(Character.Color);
     }
 
-    public override void OnStopClient()
-    {
-        _taskBar.Hide();
-    }
+    public override void OnStopClient() => _taskBar.Hide();
 
     public override void OnStartServer()
     {
@@ -112,99 +114,59 @@ public class NetworkGamePlayer : NetworkBehaviour
         NetworkManagerHW.Singleton.GamePlayers.Remove(connectionToClient.connectionId);
     }
 
+    [ServerCallback]
+    private void FixedUpdate()
+    {
+        UpdateMovement();
+        UpdateQuestTimer();
+    }
+
     [ClientCallback]
-    public void Update()
+    private void Update()
     {
-        // Run mouse input behavior if we have authority
-        if (hasAuthority && !_activeTaskPopup)
-        {
-            Ray mouseRay = Camera.main.ScreenPointToRay(_input.Game.MousePosition.ReadValue<Vector2>());
-            Debug.DrawRay(mouseRay.origin, mouseRay.direction * maxMouseRayDistance, Color.green);
+        UpdateTaskObjectSelection();
+    }
 
-            if (Physics.Raycast(mouseRay, out RaycastHit newMouseHit, maxMouseRayDistance, clickableLayers))
+    [Server]
+    public void SetupPlayer(string displayname, int characterId)
+    {
+        sync_displayName = displayname;
+        sync_characterId = characterId;
+    }
+    #endregion
+
+    #region Waypoints & Movement    
+    [Server]
+    private void UpdateMovement()
+    {
+        if (_taskWaypoints.Count > 0 && _agent.remainingDistance < 1f)
+            if (Vector3.Distance(_agent.transform.position, _taskWaypoints.Peek().Position) < 3f)
             {
-                // If another object was hit as before, set the new one highlighted and the old one not
-                if (TryGetTaskObjectFromHit(newMouseHit, out TaskObject newTaskObject) && newTaskObject != _activeTaskObject)
-                {
-                    _activeTaskObject?.SetHighlighted(false);
-                    newTaskObject.SetHighlighted(true);
-
-                    _activeTaskObject = newTaskObject;
-                }
+                TaskWaypointReached(_taskWaypoints.Peek());
             }
-            // Stop highlighting previous TaskObject and clear it if nothing was hit
-            else if (_activeTaskObject)
+            else if (!_isDoingTask)
             {
-                _activeTaskObject.SetHighlighted(false);
-                _activeTaskObject = null;
+                TaskWaypointCompleted();
             }
-        }
     }
 
-    public List<TaskData> GetAllActiveTasks()
+    private void TaskWaypointCompleted()
     {
-        List<TaskData> tasks = new List<TaskData>();
-        foreach (QuestData quest in _activeQuests)
-            foreach (TaskData task in quest.Tasks)
-                tasks.Add(task);
-
-        return tasks;
+        NavMesh.SamplePosition(_taskWaypoints.Peek().Position, out NavMeshHit hit, 10, NavMesh.AllAreas);
+        _agent.SetDestination(hit.position);
     }
 
-    public void FindQuestsIncludingTask(TaskData targetTask, out QuestData[] questsIncludingTask)
+    [Command]
+    private void CmdEnableNavAgent()
     {
-        List<QuestData> quests = new List<QuestData>();
-
-        foreach (QuestData quest in _activeQuests)
-            foreach (TaskData task in quest.Tasks)
-                if (task == targetTask)
-                    quests.Add(quest);
-
-        questsIncludingTask = quests.ToArray();
-    }
-
-    private bool TryGetTaskObjectFromHit(RaycastHit hit, out TaskObject taskObject)
-    {
-        taskObject = null;
-        if (hit.collider == null) return false;
-        return hit.collider.CompareTag("TaskObject") && hit.collider.TryGetComponent(out taskObject);
-    }
-
-    private void SelectTaskObject()
-    {
-        // Create new task menu if none is open
-        if (_activeTaskObject && !_activeTaskPopup)
-        {
-            _activeTaskObject.SetHighlighted(true);
-
-            // Instantiate TaskMenu at active task object's menu root and rotate it to facie the camera
-            _activeTaskPopup = Instantiate(taskPopupPrefab, _activeTaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
-            _activeTaskPopup.Initialize(_activeTaskObject);
-
-            TaskPopup.OnDoTask += AddTaskWaypoint;
-            TaskPopup.OnPlaceTrap += AddTrapWaypoint;
-        }
-    }
-
-    private void DestroyTaskMenu()
-    {
-        if (_activeTaskPopup)
-        {
-            _activeTaskPopup.ExecuteMouseInput();
-
-            // Clear task menu and unsubcribe from buttons
-            TaskPopup.OnDoTask -= AddTaskWaypoint;
-            TaskPopup.OnPlaceTrap -= AddTrapWaypoint;
-            Destroy(_activeTaskPopup.gameObject);
-            _activeTaskPopup = null;
-        }
+        _agent = GetComponent<NavMeshAgent>();
+        _agent.enabled = true;
+        _agent.updateRotation = false;
     }
 
     [Client]
     private void AddTaskWaypoint(TaskObject taskObject)
     {
-        Debug.Log($"Added Task {taskObject.Task.TaskName}".Color("yellow"));
-
         if (gameData.TryGetTaskId(taskObject.Task, out int taskId))
             CmdTryAddWaypoint(taskObject.TaskPosition, taskId, false);
     }
@@ -212,8 +174,6 @@ public class NetworkGamePlayer : NetworkBehaviour
     [Client]
     private void AddTrapWaypoint(TaskObject taskObject)
     {
-        Debug.Log($"Placed Trap {taskObject.Task.TaskName}".Color("yellow"));
-
         if (gameData.TryGetTaskId(taskObject.Task, out int taskId))
             CmdTryAddWaypoint(taskObject.TaskPosition, taskId, true);
     }
@@ -221,7 +181,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     [Command]
     private void CmdTryAddWaypoint(Vector3 targetPos, int taskId, bool placeTrap)
     {
-        // Dont Add Waypoint if is already waypoint
+        // Dont Add Waypoint if task already is a waypoint
         foreach (var item in _taskWaypoints)
             if (item.TaskId == taskId) return;
 
@@ -252,85 +212,36 @@ public class NetworkGamePlayer : NetworkBehaviour
     }
 
     [TargetRpc]
-    private void RpcRemoveWaypoint(NetworkConnection target, int taskId)
+    private void RpcDestroyWaypointPath(NetworkConnection target, int taskId)
     {
         _waypointPaths.TryGetValue(taskId, out GameObject waypointPath);
         Destroy(waypointPath);
         _waypointPaths.Remove(taskId);
     }
+    #endregion
 
-    [ServerCallback]
-    private void FixedUpdate()
-    {
-        // Getting quests
-        if (_questCooldown >= 0)
-        {
-            _questCooldown -= Time.fixedDeltaTime;
-            if (_questCooldown <= 0)
-            {
-                AddNewQuest();
-                _questCooldown = Random.Range(gameData.NewQuestTimerRange.x, gameData.NewQuestTimerRange.y);
-            }
-        }
-
-        // Movement
-        if (_taskWaypoints.Count > 0 && _agent.remainingDistance < 1f)
-        {
-            if (Vector3.Distance(_agent.transform.position, _taskWaypoints.Peek().Position) < 3f)
-            {
-                // Task waypoint reached, remove waypoint from list and client
-                TaskWaypoint waypoint = _taskWaypoints.Dequeue();
-
-                RpcRemoveWaypoint(connectionToClient, waypoint.TaskId);
-
-                //TODO Encounter
-                TaskData task = gameData.GetTaskById(waypoint.TaskId);
-                if (task.TaskObject.AddAndGetWorkingPlayer(connectionToClient.connectionId, out int otherPlayerId))
-                {
-                    TriggerEncounter(otherPlayerId, waypoint.TaskId);
-                }
-                else StartCoroutine(TryDoTaskOrTrap(waypoint.TaskId, waypoint.PlaceTrap));
-            }
-            else if (!_isDoingTask)
-            {
-                NavMesh.SamplePosition(_taskWaypoints.Peek().Position, out NavMeshHit hit, 10, NavMesh.AllAreas);
-                _agent.SetDestination(hit.position);
-            }
-        }
-    }
-
+    #region Task Object System
     [Server]
-    private void TriggerEncounter(int otherPlayerId, int taskId)
+    private void TaskWaypointReached(TaskWaypoint waypoint)
     {
-        if (NetworkManagerHW.Singleton.GamePlayers.TryGetValue(otherPlayerId, out NetworkGamePlayer otherPlayer))
-            otherPlayer.ExecuteEncounter(connectionToClient.connectionId, taskId);
+        // remove waypoint from list and client
+        RpcDestroyWaypointPath(connectionToClient, waypoint.TaskId);
 
-        ExecuteEncounter(otherPlayerId, taskId);
-    }
+        //TODO Encounter
+        TaskData task = gameData.GetTaskById(waypoint.TaskId);
 
-    public void ExecuteEncounter(int encounteredPlayerId, int taskId)
-    {
-        RpcShowEncounterPopup(connectionToClient, encounteredPlayerId, taskId);
-    }
+        if (task.TaskObject.PlayerAlreadyAssigned(connectionToClient.connectionId))
+            return;
 
-    [TargetRpc]
-    private void RpcShowEncounterPopup(NetworkConnection target, int encountetedPlayerId, int taskId)
-    {
-        TaskData task = gameData.GetTaskById(taskId);
-        _activeEncounterPopup = Instantiate(encounterPopupPrefab, task.TaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
-
-        EncounterPopup.OnEncounterSolution += SolutionForEncounter;
-    }
-
-    private void SolutionForEncounter(bool cooperate)
-    {
-        Debug.Log($"Cooperate {cooperate}".Color("red"));
-
-        EncounterPopup.OnEncounterSolution -= SolutionForEncounter;
-        if (_activeEncounterPopup)
+        if (task.TaskObject.AssignPlayerToTask(connectionToClient.connectionId, out int otherPlayerId))
         {
-            Destroy(_activeEncounterPopup.gameObject);
-            _activeEncounterPopup = null;
+            // trigger encounter with other player at the task
+            TriggerEncounter(otherPlayerId, waypoint);
+        }
+        else
+        {
+            // do task if no encounter was triggered, ie if only player at task
+            _taskCoroutine = StartCoroutine(TryDoTaskOrTrap(waypoint.TaskId, waypoint.PlaceTrap));
         }
     }
 
@@ -346,6 +257,270 @@ public class NetworkGamePlayer : NetworkBehaviour
             gameData.TryGetQuestId(quest, out int questId);
             RpcUpdateQuestPanel(connectionToClient, questId, taskId);
         }
+    }
+
+    [Server]
+    private void CompleteTrap(int taskId)
+    {
+        gameData.GetTaskById(taskId).TaskObject.ActivateTrap(connectionToClient);
+        AddInsanityPoints(gameData.PlaceTrapInsanityPoints);
+    }
+
+    [Server]
+    private IEnumerator TryDoTaskOrTrap(int taskId, bool isPlaceingTrap, float additionalWorkingTime = 0f)
+    {
+        TaskData task = gameData.GetTaskById(taskId);
+
+        // check if task is even available
+        if (!isPlaceingTrap)
+        {
+            //TODO Also break if active tasks are already completed
+            FindQuestsIncludingTask(task, out QuestData[] questsIncludingTask);
+            if (questsIncludingTask.Length == 0)
+            {
+                task.TaskObject.RemoveAssignedPlayer(connectionToClient.connectionId);
+                _taskWaypoints.Dequeue();
+                yield break;
+            }
+        }
+
+        _isDoingTask = true;
+
+        // Calculate time to work on task, including any trap delays
+        float workingTime;
+        if (isPlaceingTrap) workingTime = gameData.PlaceTrapWorkingTime + additionalWorkingTime;
+        else
+        {
+            task.TaskObject.CheckForTrap(out float trapDelayTime);
+            workingTime = task.WorkingTime + trapDelayTime + additionalWorkingTime;
+        }
+
+        // spawn time indicator
+        SpawnTaskTimeIndicator(connectionToClient, task.TaskObject.TaskMenuRoot.position, workingTime, isPlaceingTrap);
+
+        Debug.Log($"Task {task.TaskName} will be done in {workingTime} seconds".Color("yellow"));
+        yield return new WaitForSeconds(workingTime);
+
+        // complete action
+        if (isPlaceingTrap) CompleteTrap(taskId);
+        else CompleteTask(taskId);
+
+        DestroyTaskTimeIndicator(connectionToClient);
+        task.TaskObject.RemoveAssignedPlayer(connectionToClient.connectionId);
+
+        _taskWaypoints.Dequeue();
+        _isDoingTask = false;
+    }
+
+    [TargetRpc]
+    private void SpawnTaskTimeIndicator(NetworkConnection target, Vector3 position, float duration, bool isPlacingTrap)
+    {
+        _activeTaskTimeIndicator = Instantiate(taskTimeIndicatorPrefab, position, Camera.main.transform.rotation);
+        _activeTaskTimeIndicator.InitializeTimer(duration, isPlacingTrap);
+    }
+
+    [TargetRpc]
+    private void DestroyTaskTimeIndicator(NetworkConnection target)
+    {
+        if (_activeTaskTimeIndicator)
+        {
+            _activeTaskTimeIndicator.DestroyIndicator();
+            _activeTaskTimeIndicator = null;
+        }
+    }
+
+    private bool TryGetTaskObjectFromHit(RaycastHit hit, out TaskObject taskObject)
+    {
+        taskObject = null;
+        if (hit.collider == null) return false;
+        return hit.collider.CompareTag("TaskObject") && hit.collider.TryGetComponent(out taskObject);
+    }
+    #endregion
+
+    #region Encounter System
+    [Server]
+    private void TriggerEncounter(int otherPlayerId, TaskWaypoint waypoint)
+    {
+        // execute encounter behavior for self and other player
+        if (NetworkManagerHW.Singleton.GamePlayers.TryGetValue(otherPlayerId, out NetworkGamePlayer otherPlayer))
+        {
+            Encounter encounter = new Encounter(connectionToClient.connectionId, otherPlayerId);
+
+            otherPlayer.ExecuteEncounter(encounter, waypoint.TaskId);
+
+            ExecuteEncounter(encounter, waypoint.TaskId);
+
+            StartCoroutine(TimedEncounter());
+        }
+    }
+
+    [Server]
+    public void ExecuteEncounter(Encounter encounter, int taskId)
+    {
+        // stop current task
+        if (_taskCoroutine != null) StopCoroutine(_taskCoroutine);
+        DestroyTaskTimeIndicator(connectionToClient);
+
+        _activeEncounter = encounter;
+
+        RpcShowEncounterPopup(connectionToClient, taskId);
+    }
+
+    [TargetRpc]
+    private void RpcShowEncounterPopup(NetworkConnection target, int taskId)
+    {
+        TaskData task = gameData.GetTaskById(taskId);
+        _activeEncounterPopup = Instantiate(encounterPopupPrefab, task.TaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
+
+        EncounterPopup.OnEncounterSolution += ApplyEncounterDecision;
+    }
+
+    [Client]
+    private void ApplyEncounterDecision(bool cooperate)
+    {
+        EncounterPopup.OnEncounterSolution -= ApplyEncounterDecision;
+
+        CmdSetEncounterDecision(cooperate);
+    }
+
+    [TargetRpc]
+    private void RpcDestroyEncounterPopup(NetworkConnection target)
+    {
+        if (_activeEncounterPopup)
+        {
+            Destroy(_activeEncounterPopup.gameObject);
+            _activeEncounterPopup = null;
+        }
+    }
+
+    [Command]
+    public void CmdSetEncounterDecision(bool cooperate)
+    {
+        RpcDestroyEncounterPopup(connectionToClient);
+
+        if (_activeEncounter.ThisPlayerId == connectionToClient.connectionId)
+            _activeEncounter.ThisPlayerDecision = cooperate ? Encounter.Decision.Cooperate : Encounter.Decision.Conflict;
+        if (_activeEncounter.OtherPlayerId == connectionToClient.connectionId)
+            _activeEncounter.OtherPlayerDecision = cooperate ? Encounter.Decision.Cooperate : Encounter.Decision.Conflict;
+    }
+
+    private IEnumerator TimedEncounter()
+    {
+        float timer = 0;
+
+        while (timer < gameData.MaxEncounterDuration)
+        {
+            // end encounter if both players are decided
+            if (_activeEncounter.OtherPlayerDecision != Encounter.Decision.None &&
+                _activeEncounter.ThisPlayerDecision != Encounter.Decision.None)
+            {
+                EndEncounterOnInitiator();
+                yield break;
+            }
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // if max conflict time is over
+        // declare as conflict if a player has not set their conflict decision
+        if (_activeEncounter.OtherPlayerDecision == Encounter.Decision.None)
+            _activeEncounter.OtherPlayerDecision = Encounter.Decision.Conflict;
+        if (_activeEncounter.ThisPlayerDecision == Encounter.Decision.None)
+            _activeEncounter.ThisPlayerDecision = Encounter.Decision.Conflict;
+        EndEncounterOnInitiator();
+    }
+
+    [Server]
+    private void EndEncounterOnInitiator()
+    {
+        if (NetworkManagerHW.Singleton.GamePlayers.TryGetValue(_activeEncounter.OtherPlayerId, out NetworkGamePlayer otherPlayer))
+        {
+            int thisPlayerId = connectionToClient.connectionId;
+            int otherPlayerId = otherPlayer.connectionToClient.connectionId;
+
+            otherPlayer.EncounterOutcome(EvaluateEncounterWorkingTimeOutcome(otherPlayerId, thisPlayerId));
+
+            EncounterOutcome(EvaluateEncounterWorkingTimeOutcome(thisPlayerId, otherPlayerId));
+        }
+    }
+
+    [Server]
+    public void EncounterOutcome(float addedWorkingTime)
+    {
+        _activeEncounter = null;
+        RpcDestroyEncounterPopup(connectionToClient);
+
+        TaskWaypoint waypoint = _taskWaypoints.Peek();
+        _taskCoroutine = StartCoroutine(TryDoTaskOrTrap(waypoint.TaskId, waypoint.PlaceTrap, addedWorkingTime));
+    }
+
+    private float EvaluateEncounterWorkingTimeOutcome(int thisPlayerId, int otherPlayerId)
+    {
+        Encounter e = _activeEncounter;
+
+        // self cooperate, other conflict
+        if (e.IsDecisionCooperate(thisPlayerId) && !e.IsDecisionCooperate(otherPlayerId)) return 0 * gameData.EncounterWorkingTimeMultiplier;
+
+        // self conflict, other cooperate
+        if (!e.IsDecisionCooperate(thisPlayerId) && e.IsDecisionCooperate(otherPlayerId)) return 3 * gameData.EncounterWorkingTimeMultiplier;
+
+        // both conflict
+        if (!e.IsDecisionCooperate(thisPlayerId) && !e.IsDecisionCooperate(otherPlayerId)) return 1 * gameData.EncounterWorkingTimeMultiplier;
+
+        // both cooperate
+        if (e.IsDecisionCooperate(thisPlayerId) && e.IsDecisionCooperate(otherPlayerId)) return 2 * gameData.EncounterWorkingTimeMultiplier;
+
+        return 0;
+    }
+    #endregion
+
+    #region Quest System
+    [Server]
+    private void UpdateQuestTimer()
+    {
+        // Getting quests
+        if (_questCooldown >= 0)
+        {
+            _questCooldown -= Time.fixedDeltaTime;
+            if (_questCooldown <= 0)
+            {
+                AddNewQuest();
+                _questCooldown = Random.Range(gameData.NewQuestTimerRange.x, gameData.NewQuestTimerRange.y);
+            }
+        }
+    }
+
+    [Server]
+    private void AddNewQuest()
+    {
+        if (_activeQuests.Count > gameData.MaxQuestCount)
+        {
+            AddInsanityPoints(gameData.TooManyQuestsInsanityPoints);
+            return;
+        }
+
+        if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData quest))
+        {
+            _activeQuests.Add(quest);
+            gameData.TryGetQuestId(quest, out int questId);
+            RpcAddQuestPanel(connectionToClient, questId);
+        }
+    }
+
+    [Command]
+    private void CmdCompleteQuest(int questId)
+    {
+        QuestData quest = gameData.GetQuestById(questId);
+        AddQuestPoints(quest.QuestPoints);
+        _activeQuestPanels.Remove(quest);
+    }
+
+    [TargetRpc]
+    private void RpcAddQuestPanel(NetworkConnection target, int questId)
+    {
+        QuestData quest = gameData.GetQuestById(questId);
+        QuestPanel questPanel = GameManager.Singleton.QuestMenu.AddQuest(quest);
+        _activeQuestPanels.Add(quest, questPanel);
     }
 
     [TargetRpc]
@@ -365,37 +540,48 @@ public class NetworkGamePlayer : NetworkBehaviour
         }
     }
 
-    [Command]
-    private void CmdCompleteQuest(int questId)
+    public List<TaskData> GetAllActiveTasks()
     {
-        QuestData quest = gameData.GetQuestById(questId);
-        AddQuestPoints(quest.QuestPoints);
-        _activeQuestPanels.Remove(quest);
+        List<TaskData> tasks = new List<TaskData>();
+        foreach (QuestData quest in _activeQuests)
+            foreach (TaskData task in quest.Tasks)
+                tasks.Add(task);
+
+        return tasks;
     }
 
+    public void FindQuestsIncludingTask(TaskData targetTask, out QuestData[] questsIncludingTask)
+    {
+        List<QuestData> quests = new List<QuestData>();
+
+        foreach (QuestData quest in _activeQuests)
+            foreach (TaskData task in quest.Tasks)
+                if (task == targetTask)
+                    quests.Add(quest);
+
+        questsIncludingTask = quests.ToArray();
+    }
+    #endregion
+
+    #region Quest & Insanity Points
     [Server]
     private void AddQuestPoints(int value)
     {
-        //TODO Give player correct amount of quest points
         sync_questPoints += value;
         NetworkManagerHW.Singleton.UpdatedPlayerQuestPoints(connectionToClient.connectionId);
         RpcUpdateQuestPoints(sync_questPoints);
+
+        Debug.Log($"Added {value} QuestPoints, now {sync_questPoints}".Color("yellow"));
     }
 
     [Server]
     private void AddInsanityPoints(int value)
     {
-        //TODO Give player correct amount of insanity points
         sync_insanityPoints += value;
         NetworkManagerHW.Singleton.UpdatedPlayerInsanityPoints(connectionToClient.connectionId);
         RpcUpdateInsanityPoints(sync_insanityPoints);
-    }
 
-    [Server]
-    private void CompleteTrap(int taskId)
-    {
-        gameData.GetTaskById(taskId).TaskObject.ActivateTrap(connectionToClient);
-        AddInsanityPoints(gameData.PlaceTrapInsanityPoints);
+        Debug.Log($"Added {value} InsanityPoints, now {sync_insanityPoints}".Color("yellow"));
     }
 
     [ClientRpc]
@@ -409,84 +595,68 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
         GameManager.Singleton.PlayerProgressBars.SetInsanityPoints(insanityPoints);
     }
+    #endregion
 
-    [Server]
-    private void AddNewQuest()
+    #region Task Menu
+    private void UpdateTaskObjectSelection()
     {
-        //TODO Insanity for too many quests
-        if (_activeQuests.Count > gameData.MaxQuestCount)
+        // Run mouse input behavior if we have authority
+        if (hasAuthority && !_activeTaskPopup)
         {
-            AddInsanityPoints(gameData.TooManyQuestsInsanityPoints);
-            return;
-        }
+            Ray mouseRay = Camera.main.ScreenPointToRay(_input.Game.MousePosition.ReadValue<Vector2>());
+            Debug.DrawRay(mouseRay.origin, mouseRay.direction * maxMouseRayDistance, Color.green);
 
-        if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData quest))
+            // try to select task object if anything was hit
+            if (Physics.Raycast(mouseRay, out RaycastHit newMouseHit, maxMouseRayDistance, clickableLayers))
+            {
+                // If another object was hit as before, set the new one highlighted and the old one not
+                if (TryGetTaskObjectFromHit(newMouseHit, out TaskObject newTaskObject) && newTaskObject != _activeTaskObject)
+                {
+                    _activeTaskObject?.SetHighlighted(false);
+                    newTaskObject.SetHighlighted(true);
+
+                    _activeTaskObject = newTaskObject;
+                }
+            }
+            // Stop highlighting previous TaskObject and clear it if nothing was hit
+            else if (_activeTaskObject)
+            {
+                _activeTaskObject.SetHighlighted(false);
+                _activeTaskObject = null;
+            }
+        }
+    }
+
+    private void SelectTaskObject()
+    {
+        // Create new task menu if none is open
+        if (_activeTaskObject && !_activeTaskPopup && !_activeEncounterPopup)
         {
-            _activeQuests.Add(quest);
-            gameData.TryGetQuestId(quest, out int questId);
-            RpcAddQuestPanel(connectionToClient, questId);
+            _activeTaskObject.SetHighlighted(true);
+
+            // Instantiate TaskMenu at active task object's menu root and rotate it to facie the camera
+            _activeTaskPopup = Instantiate(taskPopupPrefab, _activeTaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
+            _activeTaskPopup.Initialize(_activeTaskObject);
+
+            TaskPopup.OnDoTask += AddTaskWaypoint;
+            TaskPopup.OnPlaceTrap += AddTrapWaypoint;
         }
     }
 
-    [TargetRpc]
-    private void RpcAddQuestPanel(NetworkConnection target, int questId)
+    private void DestroyTaskMenu()
     {
-        QuestData quest = gameData.GetQuestById(questId);
-        QuestPanel questPanel = GameManager.Singleton.QuestMenu.AddQuest(quest);
-        _activeQuestPanels.Add(quest, questPanel);
-    }
-
-    [Server]
-    private IEnumerator TryDoTaskOrTrap(int taskId, bool placeTrap)
-    {
-        TaskData task = gameData.GetTaskById(taskId);
-
-        // if task is not needed, to not work on task
-        if (!placeTrap)
+        if (_activeTaskPopup)
         {
-            //TODO Also break if active tasks are already completed
-            FindQuestsIncludingTask(task, out QuestData[] questsIncludingTask);
-            if (questsIncludingTask.Length == 0)
-                yield break;
+            _activeTaskPopup.ExecuteMouseInput();
+
+            // Clear task menu and unsubcribe from buttons
+            TaskPopup.OnDoTask -= AddTaskWaypoint;
+            TaskPopup.OnPlaceTrap -= AddTrapWaypoint;
+            Destroy(_activeTaskPopup.gameObject);
+            _activeTaskPopup = null;
         }
-
-        _isDoingTask = true;
-
-        // Calculate time to work on task, including any trap delays
-        float workingTime;
-        if (placeTrap) workingTime = gameData.PlaceTrapWorkingTime;
-        else
-        {
-            task.TaskObject.CheckForTrap(out float trapDelayTime);
-            workingTime = task.WorkingTime + trapDelayTime;
-        }
-
-        TaskTimeIndicator timeIndicator = Instantiate(taskTimeIndicatorPrefab, task.TaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
-        timeIndicator.InitializeTimer(workingTime, placeTrap);
-
-        yield return new WaitForSeconds(workingTime);
-
-        if (placeTrap) CompleteTrap(taskId);
-        else CompleteTask(taskId);
-
-        timeIndicator.DestroyIndicator();
-        _isDoingTask = false;
     }
-
-    [Command]
-    private void CmdEnableNavAgent()
-    {
-        _agent = GetComponent<NavMeshAgent>();
-        _agent.enabled = true;
-        _agent.updateRotation = false;
-    }
-
-    [Server]
-    public void SetupPlayer(string displayname, int characterId)
-    {
-        sync_displayName = displayname;
-        sync_characterId = characterId;
-    }
+    #endregion
 
     public void LeaveGame()
     {
@@ -499,3 +669,29 @@ public class NetworkGamePlayer : NetworkBehaviour
             NetworkManagerHW.Singleton.StopClient();
     }
 }
+
+public class Encounter
+{
+    public enum Decision { None, Conflict, Cooperate }
+
+    public int ThisPlayerId { get; set; }
+    public int OtherPlayerId { get; set; }
+    public Decision ThisPlayerDecision { get; set; }
+    public Decision OtherPlayerDecision { get; set; }
+
+    public Encounter(int thisPlayerId, int otherPlayerId)
+    {
+        ThisPlayerId = thisPlayerId;
+        OtherPlayerId = otherPlayerId;
+        ThisPlayerDecision = Decision.None;
+        OtherPlayerDecision = Decision.None;
+    }
+
+    public bool IsDecisionCooperate(int playerId)
+    {
+        if (playerId == ThisPlayerId) return ThisPlayerDecision == Decision.Cooperate;
+        if (playerId == OtherPlayerId) return OtherPlayerDecision == Decision.Cooperate;
+        return false;
+    }
+}
+
