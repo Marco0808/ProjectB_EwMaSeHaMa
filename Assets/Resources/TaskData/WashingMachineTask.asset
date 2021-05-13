@@ -15,5 +15,5 @@ MonoBehaviour:
   taskName: Make Laundry
   maxPlayersAtTask: 1
   workingTime: 2
-  objectSprite: {fileID: 21300000, guid: 91a83f1f293e93946abbaef9d92d7af5, type: 3}
-  icon: {fileID: 21300000, guid: 91a83f1f293e93946abbaef9d92d7af5, type: 3}
+  objectSprite: {fileID: 21300000, guid: 8ea5e949c9a77524a813dc09790b70f0, type: 3}
+  icon: {fileID: 21300000, guid: 8ea5e949c9a77524a813dc09790b70f0, type: 3}

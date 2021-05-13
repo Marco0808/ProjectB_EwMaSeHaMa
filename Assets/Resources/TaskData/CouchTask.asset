@@ -15,5 +15,5 @@ MonoBehaviour:
   taskName: Sleep on Couch
   maxPlayersAtTask: 1
   workingTime: 2
-  objectSprite: {fileID: 21300000, guid: b5cc99adbbec78b499d88145a4424c20, type: 3}
-  icon: {fileID: 21300000, guid: b5cc99adbbec78b499d88145a4424c20, type: 3}
+  objectSprite: {fileID: 21300000, guid: a3e4be07b681e2847a9d383db76418c3, type: 3}
+  icon: {fileID: 21300000, guid: a3e4be07b681e2847a9d383db76418c3, type: 3}

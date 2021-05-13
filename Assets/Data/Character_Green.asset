@@ -15,6 +15,6 @@ MonoBehaviour:
   characterName: Zero
   backgroundStory: Lorem ipsum dolor sit amet consectetur adipisicing elit.
   color: {r: 0.2755012, g: 0.7924528, b: 0.16820934, a: 1}
-  portrait: {fileID: 21300000, guid: d5281be8981080a48ba88f9ee4728207, type: 3}
+  portrait: {fileID: 21300000, guid: c6d76d34f901c1049a4b24f4809cffd9, type: 3}
   playerCharacter: {fileID: 0}
   playerAnimatorController: {fileID: 9100000, guid: 20589936cd997374f9ed277d4fd183f6, type: 2}
