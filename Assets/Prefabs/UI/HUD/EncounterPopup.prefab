@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 4714622932601543016}
   - component: {fileID: 8541800105840090536}
   - component: {fileID: 3567669318660530662}
+  - component: {fileID: 2274601277950192550}
   m_Layer: 6
   m_Name: ConflictButton
   m_TagString: Untagged
@@ -135,7 +136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.54901963, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -152,6 +153,62 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2274601277950192550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212415384876016522}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 0.54901963, b: 0, a: 1}
+    m_HighlightedColor: {r: 1, g: 0.7294118, b: 0.39999998, a: 1}
+    m_PressedColor: {r: 1, g: 0.54901963, b: 0, a: 1}
+    m_SelectedColor: {r: 1, g: 0.54901963, b: 0, a: 1}
+    m_DisabledColor: {r: 1, g: 0.54901963, b: 0, a: 1}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 3567669318660530662}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8286444423987445485}
+        m_TargetAssemblyTypeName: EncounterPopup, Assembly-CSharp
+        m_MethodName: ConflictPressed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3144774393117296033
 GameObject:
   m_ObjectHideFlags: 0
@@ -164,7 +221,7 @@ GameObject:
   - component: {fileID: 3144774393117296092}
   - component: {fileID: 3144774393117296095}
   - component: {fileID: 3144774393117296094}
-  - component: {fileID: 3144774393117296090}
+  - component: {fileID: 8286444423987445485}
   m_Layer: 6
   m_Name: EncounterPopup
   m_TagString: Untagged
@@ -237,7 +294,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &3144774393117296094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,7 +312,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &3144774393117296090
+--- !u!114 &8286444423987445485
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -264,12 +321,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 3144774393117296033}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 322308938725404478c422a6533832a5, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c975c8d0a5c8ec4f95feb12c0b9fa4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  taskNameText: {fileID: 3144774394545393265}
-  trapButtonImage: {fileID: 3567669318660530662}
-  taskButtonImage: {fileID: 6177375214563432803}
 --- !u!1 &3144774394545393267
 GameObject:
   m_ObjectHideFlags: 0
@@ -415,6 +469,7 @@ GameObject:
   - component: {fileID: 8113405010353240259}
   - component: {fileID: 4172282619911293287}
   - component: {fileID: 6177375214563432803}
+  - component: {fileID: 364445268563884761}
   m_Layer: 6
   m_Name: CooperateButton
   m_TagString: Untagged
@@ -464,7 +519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -481,6 +536,62 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &364445268563884761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3160318650896814959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 0, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.5, g: 1, b: 1, a: 1}
+    m_PressedColor: {r: 0, g: 1, b: 1, a: 1}
+    m_SelectedColor: {r: 0, g: 1, b: 1, a: 1}
+    m_DisabledColor: {r: 0, g: 1, b: 1, a: 1}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 6177375214563432803}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8286444423987445485}
+        m_TargetAssemblyTypeName: EncounterPopup, Assembly-CSharp
+        m_MethodName: CooperatePressed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4993654764176900227
 GameObject:
   m_ObjectHideFlags: 0

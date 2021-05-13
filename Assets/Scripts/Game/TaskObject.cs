@@ -10,6 +10,8 @@ public class TaskObject : NetworkBehaviour
     [SerializeField] private Transform taskMenuRoot;
 
     [SyncVar] private bool sync_isTrapActive;
+    /// <summary>List of game player connectionId's, that working on this task.</summary>
+    private SyncList<int> sync_workingPlayerIDs = new SyncList<int>();
 
     private TaskData _task;
     private SpriteRenderer _spriteRenderer;
@@ -32,6 +34,31 @@ public class TaskObject : NetworkBehaviour
 
         _spriteRenderer.sprite = _task.ObjectSprite;
         StartCoroutine(ResetCollider());
+    }
+
+    [Server]
+    public bool AddAndGetWorkingPlayer(int addedConnectionId, out int otherConnectionId)
+    {
+        int[] otherPlayerIDs = new int[sync_workingPlayerIDs.Count];
+        sync_workingPlayerIDs.CopyTo(otherPlayerIDs, 0);
+        sync_workingPlayerIDs.Add(addedConnectionId);
+
+        if (otherPlayerIDs.Length > 0)
+        {
+            otherConnectionId = otherPlayerIDs[0];
+            return true;
+        }
+        else
+        {
+            otherConnectionId = -1;
+            return false;
+        }
+    }
+
+    [Server]
+    public void RemoveWorkingPlayer(int connectionId)
+    {
+        sync_workingPlayerIDs.Remove(connectionId);
     }
 
     #region Trap System

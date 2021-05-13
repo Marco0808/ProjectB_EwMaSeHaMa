@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class TaskMenu : MonoBehaviour
+public class TaskPopup : MonoBehaviour
 {
     [SerializeField] private TMP_Text taskNameText;
     [SerializeField] private Image trapButtonImage;
