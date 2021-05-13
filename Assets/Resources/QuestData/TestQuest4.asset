@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: Sofa Waschen
   caption: Lorem ipsum dolor sit amet consectetur adipisicing elit.
-  taskPoints: 100
-  completeTasksInOrder: 1
+  questPoints: 125
+  completeTasksInOrder: 0
   tasksToComplete:
   - {fileID: 11400000, guid: 3664038cf56ea4a41a157b1f9f476c2b, type: 2}
   - {fileID: 11400000, guid: 8b62867cc30edd04a9653e6f37c53539, type: 2}

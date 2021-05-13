@@ -80,12 +80,12 @@ public class NetworkLobbyPlayer : NetworkBehaviour
 
     public override void OnStartServer()
     {
-        NetworkManagerHousework.Singleton.LobbyPlayers.Add(connectionToClient.connectionId, this);
+        NetworkManagerHW.Singleton.LobbyPlayers.Add(connectionToClient.connectionId, this);
     }
 
     public override void OnStopServer()
     {
-        NetworkManagerHousework.Singleton.LobbyPlayers.Remove(connectionToClient.connectionId);
+        NetworkManagerHW.Singleton.LobbyPlayers.Remove(connectionToClient.connectionId);
     }
 
     [Command]
@@ -118,7 +118,7 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     {
         sync_isReady = isReady;
         RpcUpdateReadyState(isReady);
-        NetworkManagerHousework.Singleton.PlayerChangedReadyState();
+        NetworkManagerHW.Singleton.PlayerChangedReadyState();
     }
 
     [ClientRpc]
@@ -146,18 +146,18 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     [Command]
     public void CmdStartGame()
     {
-        if (sync_isLeader) NetworkManagerHousework.Singleton.StartGame();
+        if (sync_isLeader) NetworkManagerHW.Singleton.StartGame();
     }
 
     public void LeaveLobby()
     {
         // stop host if is host
         if (NetworkServer.active && NetworkClient.isConnected)
-            NetworkManagerHousework.Singleton.StopHost();
+            NetworkManagerHW.Singleton.StopHost();
 
         // stop client if client-only
         if (NetworkClient.isConnected)
-            NetworkManagerHousework.Singleton.StopClient();
+            NetworkManagerHW.Singleton.StopClient();
     }
 
     public void ToggleCharacterSelection()

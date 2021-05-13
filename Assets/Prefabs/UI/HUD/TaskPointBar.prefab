@@ -89,7 +89,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 198b33967e0e69641b8e4b759ce15ed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointBar: {fileID: 3313175716468067548}
+  progressBar: {fileID: 3313175716468067548}
   goalIndicator: {fileID: 3313175717281838952}
 --- !u!1 &3313175717281838958
 GameObject:

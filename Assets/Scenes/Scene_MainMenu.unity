@@ -1033,6 +1033,7 @@ MonoBehaviour:
   gameScene: Assets/Scenes/Scene_GameDev.unity
   gamePlayerPrefab: {fileID: 6237668881987465340, guid: 6ceb8f8165ab7274c834066de7e432e5, type: 3}
   spawnSystemPrefab: {fileID: 9143434194214237576, guid: 3819a5333fe879142b4307b8b5b89de0, type: 3}
+  gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
 --- !u!4 &639811173
 Transform:
   m_ObjectHideFlags: 0

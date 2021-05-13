@@ -400,7 +400,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0
   clickableLayers:
     serializedVersion: 2
     m_Bits: 1024
@@ -408,10 +408,9 @@ MonoBehaviour:
   gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
   displayNameText: {fileID: 4617159372081704148}
   spriteRenderer: {fileID: 7697657172321421906}
-  taskMenuPrefab: {fileID: 2608874699922423487, guid: f6ff3eda4cb8d7a4e90a324a8d169757, type: 3}
-  taskPathMat: {fileID: 2100000, guid: c5b5c6c8ec9606141a3b6fc2b903021e, type: 2}
-  trapPathMat: {fileID: 2100000, guid: 36ee8af8026df4643ae757444309d7db, type: 2}
+  taskPopupPrefab: {fileID: 2608874699922423487, guid: f6ff3eda4cb8d7a4e90a324a8d169757, type: 3}
   waypointPathPrefab: {fileID: 5146185149860604163, guid: 4a1026b8dbeb8d14783540b8f6495ad4, type: 3}
+  taskTimeIndicatorPrefab: {fileID: 7904313497987312926, guid: 460e8e28cb208234abcfac881b5f7dd3, type: 3}
 --- !u!114 &-4492016267369724033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -444,8 +443,8 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_WalkableMask: 7
+  m_ObstacleAvoidanceType: 0
 --- !u!114 &3791339815119572847
 MonoBehaviour:
   m_ObjectHideFlags: 0

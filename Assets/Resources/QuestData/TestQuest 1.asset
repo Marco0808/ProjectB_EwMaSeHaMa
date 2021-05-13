@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: Waschen
   caption: "w\xE4sche waschen, jetzt"
-  taskPoints: 100
-  completeTasksInOrder: 1
+  questPoints: 75
+  completeTasksInOrder: 0
   tasksToComplete:
   - {fileID: 11400000, guid: 8b62867cc30edd04a9653e6f37c53539, type: 2}

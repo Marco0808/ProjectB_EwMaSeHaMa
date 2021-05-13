@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 611dd233f0f57b946bd4d9454bca084d, type: 3}
-  m_Name: CouchTask
+  m_Name: WashingMachineTask
   m_EditorClassIdentifier: 
-  taskName: Sleep on Couch
+  taskName: Make Laundry
   maxPlayersAtTask: 1
-  workingTime: 1
-  objectSprite: {fileID: 21300000, guid: b5cc99adbbec78b499d88145a4424c20, type: 3}
-  icon: {fileID: 21300000, guid: b5cc99adbbec78b499d88145a4424c20, type: 3}
+  workingTime: 2
+  objectSprite: {fileID: 21300000, guid: 91a83f1f293e93946abbaef9d92d7af5, type: 3}
+  icon: {fileID: 21300000, guid: 91a83f1f293e93946abbaef9d92d7af5, type: 3}

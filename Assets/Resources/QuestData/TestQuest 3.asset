@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: Chillen
   caption: Lorem ipsum dolor sit amet consectetur adipisicing elit.
-  taskPoints: 100
-  completeTasksInOrder: 1
+  questPoints: 100
+  completeTasksInOrder: 0
   tasksToComplete:
   - {fileID: 11400000, guid: 3664038cf56ea4a41a157b1f9f476c2b, type: 2}
   - {fileID: 11400000, guid: eff09612227f2d54990997109f19f02a, type: 2}

@@ -2,18 +2,18 @@ using UnityEngine;
 using Mirror;
 using TMPro;
 
-[RequireComponent(typeof(NetworkManagerHousework), typeof(SteamLobby))]
+[RequireComponent(typeof(NetworkManagerHW), typeof(SteamLobby))]
 public class NetworkTransportChanger : MonoBehaviour
 {
     [SerializeField] private Transport steamworksTransport;
     [SerializeField] private Transport localTransport;
     [SerializeField] private TMP_InputField networkAdressField;
 
-    private NetworkManagerHousework _networkManager;
+    private NetworkManagerHW _networkManager;
 
     private void Awake()
     {
-        _networkManager = GetComponent<NetworkManagerHousework>();
+        _networkManager = GetComponent<NetworkManagerHW>();
     }
 
     public void SteamworksHost()

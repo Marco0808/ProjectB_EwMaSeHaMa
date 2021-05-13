@@ -76,7 +76,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0
+  markTrappedColor: {r: 1, g: 0.76163876, b: 0.43867922, a: 0}
   gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
   taskMenuRoot: {fileID: 8905827655711940427}
 --- !u!212 &5291352209783794402
