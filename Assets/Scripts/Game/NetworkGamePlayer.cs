@@ -18,6 +18,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text displayNameText;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Animator animator; 
 
     [Header("Prefabs")]
     [SerializeField] private TaskPopup taskPopupPrefab;
@@ -88,7 +89,9 @@ public class NetworkGamePlayer : NetworkBehaviour
     public override void OnStartClient()
     {
         displayNameText.text = sync_displayName;
-        spriteRenderer.color = Character.Color;
+        //spriteRenderer.color = Character.Color;
+        
+        animator.runtimeAnimatorController = Character.PlayerAnimatorController;
 
         _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailablequestPointsBar();
         _taskBar.Initialize(Character.Color);
