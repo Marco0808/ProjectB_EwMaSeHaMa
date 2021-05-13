@@ -11,10 +11,12 @@ public class CharacterData : ScriptableObject
     [SerializeField] private Color color;
     [SerializeField, ShowAssetPreview] private Sprite portrait;
     [SerializeField, ShowAssetPreview] private Sprite playerCharacter;
+    [SerializeField] private RuntimeAnimatorController playerAnimatorController; 
 
     public string CharacterName => characterName;
     public string BackgroundStory => backgroundStory;
     public Color Color => color;
     public Sprite Portrait => portrait;
     public Sprite PlayerCharacter => playerCharacter;
+    public RuntimeAnimatorController PlayerAnimatorController => playerAnimatorController; 
 }
