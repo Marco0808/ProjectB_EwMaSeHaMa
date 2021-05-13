@@ -12,13 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b521c9ebf0f5646b080fad58e1a443, type: 3}
   m_Name: GameData_Default
   m_EditorClassIdentifier: 
-  newQuestTimerRange: {x: 10, y: 15}
+  newQuestTimerRange: {x: 20, y: 30}
   maxQuestCount: 5
   trapTaskDelayTime: 3
+  placeTrapWorkingTime: 5
+  encounterWorkingTimeMultiplier: 2
+  maxEncounterDuration: 5
   placeTrapInsanityPoints: 50
   tooManyQuestsInsanityPoints: 100
   maxInsanityPoints: 1000
   maxQuestPoints: 1000
+  teamWinPointPercentage: 0.7
   taskColor: {r: 0, g: 1, b: 1, a: 1}
   insanityColor: {r: 1, g: 0.5482237, b: 0, a: 1}
   characters:

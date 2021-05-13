@@ -12,6 +12,10 @@ public class GameData : ScriptableObject
     [SerializeField] private int maxQuestCount = 5;
     [SerializeField] private float trapTaskDelayTime = 3;
     [SerializeField] private float placeTrapWorkingTime = 5;
+
+    [Tooltip("Self cooperate, other conflict = x0\nSelf conflict, other cooperate = x3\nBoth conflict = x1\nBoth cooperate = x2")]
+    [SerializeField] private float encounterWorkingTimeMultiplier = 2;
+    [SerializeField] private float maxEncounterDuration = 5;
     [Space]
     [SerializeField] private int placeTrapInsanityPoints = 50;
     [SerializeField] private int tooManyQuestsInsanityPoints = 100;
@@ -33,12 +37,14 @@ public class GameData : ScriptableObject
     public int MaxQuestCount => maxQuestCount;
     public float TrapTaskDelayTime => trapTaskDelayTime;
     public float PlaceTrapWorkingTime => placeTrapWorkingTime;
-    public float TeamWinPointPercentage => teamWinPointPercentage;
+    public float EncounterWorkingTimeMultiplier => encounterWorkingTimeMultiplier;
+    public float MaxEncounterDuration => maxEncounterDuration;
 
     public int PlaceTrapInsanityPoints => placeTrapInsanityPoints;
     public int TooManyQuestsInsanityPoints => tooManyQuestsInsanityPoints;
     public int MaxInsanityPoints => maxInsanityPoints;
     public int MaxQuestPoints => maxQuestPoints;
+    public float TeamWinPointPercentage => teamWinPointPercentage;
 
     public Color TaskColor => taskColor;
     public Color InsanityColor => insanityColor;

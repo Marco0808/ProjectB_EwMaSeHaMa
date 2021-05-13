@@ -1025,7 +1025,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 3ba634896289fe64e9a544110bcc82a3, type: 3}
       propertyPath: m_Materials.Array.data[10]
       value: 
-      objectReference: {fileID: 2100000, guid: b246b372b9f892444bbbd994c51dbe47, type: 2}
+      objectReference: {fileID: 2100000, guid: 38d8a22a0aa16554fa9eeb2389a9cf1f, type: 2}
     - target: {fileID: -7511558181221131132, guid: 3ba634896289fe64e9a544110bcc82a3, type: 3}
       propertyPath: m_Materials.Array.data[11]
       value: 
@@ -1053,11 +1053,11 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 3ba634896289fe64e9a544110bcc82a3, type: 3}
       propertyPath: m_Materials.Array.data[17]
       value: 
-      objectReference: {fileID: 2100000, guid: 846d08b9225035d459ab0e5ac73feb26, type: 2}
+      objectReference: {fileID: 2100000, guid: 38d8a22a0aa16554fa9eeb2389a9cf1f, type: 2}
     - target: {fileID: -7511558181221131132, guid: 3ba634896289fe64e9a544110bcc82a3, type: 3}
       propertyPath: m_Materials.Array.data[19]
       value: 
-      objectReference: {fileID: 2100000, guid: c2d9ff9449d564045b730f7c957c2537, type: 2}
+      objectReference: {fileID: -8479617114563180810, guid: bfc6db13e7db0f9418151e3ce9826752, type: 3}
     - target: {fileID: 919132149155446097, guid: 3ba634896289fe64e9a544110bcc82a3, type: 3}
       propertyPath: m_Name
       value: HouseTextures
@@ -1358,7 +1358,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_BuildHeightMesh: 0
-  m_NavMeshData: {fileID: 23800000, guid: e1a2400c9a8ec2d46ab027a41229f3e1, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 52f5cbfc1f6541e45a8da9fc48c527b4, type: 2}
 --- !u!1 &785344301
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,7 @@ public class TaskObject : NetworkBehaviour
 
     [SyncVar] private bool sync_isTrapActive;
     /// <summary>List of game player connectionId's, that working on this task.</summary>
-    private SyncList<int> sync_workingPlayerIDs = new SyncList<int>();
+    private SyncHashSet<int> sync_workingPlayerIDs = new SyncHashSet<int>();
 
     private TaskData _task;
     private SpriteRenderer _spriteRenderer;
@@ -36,27 +36,35 @@ public class TaskObject : NetworkBehaviour
         StartCoroutine(ResetCollider());
     }
 
+    /// <summary>Assign a player to a task and return another player that is currently on the task. If there is none, return false.</summary>
     [Server]
-    public bool AddAndGetWorkingPlayer(int addedConnectionId, out int otherConnectionId)
+    public bool AssignPlayerToTask(int playerConnectionId, out int otherPlayerConnectionId)
     {
-        int[] otherPlayerIDs = new int[sync_workingPlayerIDs.Count];
-        sync_workingPlayerIDs.CopyTo(otherPlayerIDs, 0);
-        sync_workingPlayerIDs.Add(addedConnectionId);
+        sync_workingPlayerIDs.Add(playerConnectionId);
 
-        if (otherPlayerIDs.Length > 0)
+        // get copy of working players list without self
+        List<int> otherPlayerIDs = new List<int>(sync_workingPlayerIDs);
+        otherPlayerIDs.Remove(playerConnectionId);
+
+        if (otherPlayerIDs.Count > 0)
         {
-            otherConnectionId = otherPlayerIDs[0];
+            otherPlayerConnectionId = otherPlayerIDs[0];
             return true;
         }
         else
         {
-            otherConnectionId = -1;
+            otherPlayerConnectionId = -1;
             return false;
         }
     }
 
+    public bool PlayerAlreadyAssigned(int playerConnectionId)
+    {
+        return sync_workingPlayerIDs.Contains(playerConnectionId);
+    }
+
     [Server]
-    public void RemoveWorkingPlayer(int connectionId)
+    public void RemoveAssignedPlayer(int connectionId)
     {
         sync_workingPlayerIDs.Remove(connectionId);
     }
