@@ -24,13 +24,13 @@ public class PlayerSpawnSystem : NetworkBehaviour
 
     public override void OnStartServer()
     {
-        NetworkManagerHousework.OnServerReadied += SpawnPlayer;
+        NetworkManagerHW.OnServerReadied += SpawnPlayer;
     }
 
     [ServerCallback]
     private void OnDestroy()
     {
-        NetworkManagerHousework.OnServerReadied -= SpawnPlayer;
+        NetworkManagerHW.OnServerReadied -= SpawnPlayer;
     }
 
     [Server]
@@ -48,7 +48,7 @@ public class PlayerSpawnSystem : NetworkBehaviour
         gamePlayer.transform.position = _spawnPoints[_nextIndex].position;
         gamePlayer.gameObject.name = $"{gamePlayerPrefab.name} [connId={conn.connectionId}]";
 
-        NetworkManagerHousework.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer);
+        NetworkManagerHW.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer);
         gamePlayer.SetupPlayer(lobbyPlayer.DisplayName, lobbyPlayer.CharacterId);
 
         // Destroy and replace connection's old player object if it still exist, otherwise add new player

@@ -13,11 +13,11 @@ public class SteamLobby : MonoBehaviour
     private Callback<GameLobbyJoinRequested_t> _lobbyJoinRequested;
     private Callback<LobbyEnter_t> _lobbyEntered;
 
-    private NetworkManagerHousework _networkManager;
+    private NetworkManagerHW _networkManager;
 
     private void Start()
     {
-        _networkManager = GetComponent<NetworkManagerHousework>();
+        _networkManager = GetComponent<NetworkManagerHW>();
 
         if (SteamManager.Initialized)
         {

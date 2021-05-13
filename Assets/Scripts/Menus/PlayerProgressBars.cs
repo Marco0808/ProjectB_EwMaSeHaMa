@@ -10,32 +10,44 @@ public class PlayerProgressBars : MonoBehaviour
     [Header("Task Points")]
     [SerializeField, OnValueChanged("UpdateTaskBarSize")] private float maxTaskBarLenght = 150;
     [SerializeField, OnValueChanged("UpdateTaskBarBackground"), Range(0.5f, 1)] private float taskPointPercentageNeeded = 0.7f;
-    [SerializeField] private TaskPointsBar[] taskPointBars;
+    [SerializeField] private QuestPointsBar[] taskPointBars;
     [SerializeField] private RectTransform taskBarBackground;
 
     [Header("Insanity Points")]
-    [SerializeField] private Image insanityBar;
+    [SerializeField] private RectTransform insanityBarTrans;
+
+    float _maxInsanityBarLenght;
 
     private void Start()
     {
+        _maxInsanityBarLenght = insanityBarTrans.sizeDelta.x;
+
         UpdateTaskBarSize();
-        foreach (TaskPointsBar taskBar in taskPointBars) taskBar.Hide();
+        foreach (QuestPointsBar taskBar in taskPointBars) taskBar.Hide();
+
+        SetInsanityPoints(0);
     }
 
-    public TaskPointsBar GetAvailableTaskPointsBar()
+    public QuestPointsBar GetAvailablequestPointsBar()
     {
-        foreach (TaskPointsBar taskBar in taskPointBars)
+        foreach (QuestPointsBar taskBar in taskPointBars)
             if (!taskBar.gameObject.activeSelf)
                 return taskBar;
         return null;
     }
 
+    public void SetInsanityPoints(int insanityPoints)
+    {
+        float normalizedInsanityPoints = (float)insanityPoints / NetworkManagerHW.Singleton.GameData.MaxInsanityPoints;
+        insanityBarTrans.sizeDelta = new Vector2(_maxInsanityBarLenght * normalizedInsanityPoints, insanityBarTrans.sizeDelta.y);
+    }
+
     private void UpdateTaskBarSize()
     {
-        foreach (TaskPointsBar bar in taskPointBars)
+        foreach (QuestPointsBar bar in taskPointBars)
         {
             bar.MaxLenght = maxTaskBarLenght;
-            bar.PointBar.rectTransform.sizeDelta = new Vector2(maxTaskBarLenght, bar.PointBar.rectTransform.sizeDelta.y);
+            bar.ProgressBar.rectTransform.sizeDelta = new Vector2(maxTaskBarLenght, bar.ProgressBar.rectTransform.sizeDelta.y);
             RectTransform goalTrans = bar.GoalIndicator.rectTransform;
             goalTrans.localPosition = new Vector2(maxTaskBarLenght - goalTrans.sizeDelta.x / 2, 0);
         }

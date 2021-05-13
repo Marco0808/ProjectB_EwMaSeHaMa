@@ -38,13 +38,13 @@ public class TaskMenu : MonoBehaviour
         if (mousePoint.y > _menuCenterPoint.y)
         {
             bool isMouseLeft = mousePoint.x < _menuCenterPoint.x;
-            SetImageAlpha(trapButtonImage, isMouseLeft ? 0.8f : 0.3f);
-            SetImageAlpha(taskButtonImage, isMouseLeft ? 0.3f : 0.8f);
+            SetImageAlpha(trapButtonImage, isMouseLeft ? 0.8f : 0.5f);
+            SetImageAlpha(taskButtonImage, isMouseLeft ? 0.5f : 0.8f);
         }
         else
         {
-            SetImageAlpha(trapButtonImage, 0.3f);
-            SetImageAlpha(taskButtonImage, 0.3f);
+            SetImageAlpha(trapButtonImage, 0.5f);
+            SetImageAlpha(taskButtonImage, 0.5f);
         }
     }
 

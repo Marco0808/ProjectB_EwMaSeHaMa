@@ -21,20 +21,20 @@ public class NetworkGamePlayer : NetworkBehaviour
     [SerializeField] private Animator animator; 
 
     [Header("Prefabs")]
-    [SerializeField] private TaskMenu taskMenuPrefab;
+    [SerializeField] private TaskMenu taskPopupPrefab;
 
     [Header("Waypoint Path")]
-    [SerializeField] private Material taskPathMat;
-    [SerializeField] private Material trapPathMat;
     [SerializeField] private LineRenderer waypointPathPrefab;
+    [SerializeField] private TaskTimeIndicator taskTimeIndicatorPrefab;
 
     [SyncVar] private string sync_displayName = "foo";
     [SyncVar] private int sync_characterId;
-    [SyncVar] private float sync_taskPoints = 0;
+    [SyncVar] private int sync_questPoints = 0;
+    [SyncVar] private int sync_insanityPoints = 0;
 
     private InputActions _input;
     private NavMeshAgent _agent;
-    private TaskPointsBar _taskBar;
+    private QuestPointsBar _taskBar;
 
     private TaskObject _activeTaskObject;
     private TaskMenu _activeTaskMenu;
@@ -47,7 +47,8 @@ public class NetworkGamePlayer : NetworkBehaviour
     private Dictionary<int, GameObject> _waypointPaths = new Dictionary<int, GameObject>();
 
     public string DisplayName => sync_displayName;
-    public float TaskPoints => sync_taskPoints;
+    public float QuestPoints => sync_questPoints;
+    public float InsanityPoints => sync_insanityPoints;
     public CharacterData Character => gameData.GetCharacterById(sync_characterId);
 
     public struct TaskWaypoint
@@ -90,23 +91,23 @@ public class NetworkGamePlayer : NetworkBehaviour
         
         animator.runtimeAnimatorController = Character.PlayerAnimatorController;
 
-        _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailableTaskPointsBar();
+        _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailablequestPointsBar();
         _taskBar.Initialize(Character.Color);
     }
 
     public override void OnStopClient()
     {
-        _taskBar?.Hide();
+        _taskBar.Hide();
     }
 
     public override void OnStartServer()
     {
-        NetworkManagerHousework.Singleton.GamePlayers.Add(connectionToClient.connectionId, this);
+        NetworkManagerHW.Singleton.GamePlayers.Add(connectionToClient.connectionId, this);
     }
 
     public override void OnStopServer()
     {
-        NetworkManagerHousework.Singleton.GamePlayers.Remove(connectionToClient.connectionId);
+        NetworkManagerHW.Singleton.GamePlayers.Remove(connectionToClient.connectionId);
     }
 
     [ClientCallback]
@@ -138,7 +139,7 @@ public class NetworkGamePlayer : NetworkBehaviour
         }
     }
 
-    public List<TaskData> GetTasksFromActiveQuests()
+    public List<TaskData> GetAllActiveTasks()
     {
         List<TaskData> tasks = new List<TaskData>();
         foreach (QuestData quest in _activeQuests)
@@ -148,18 +149,16 @@ public class NetworkGamePlayer : NetworkBehaviour
         return tasks;
     }
 
-    public bool TryFindQuestOfTask(TaskData taskToFind, out QuestData activeQuest)
+    public void FindQuestsIncludingTask(TaskData targetTask, out QuestData[] questsIncludingTask)
     {
+        List<QuestData> quests = new List<QuestData>();
+
         foreach (QuestData quest in _activeQuests)
             foreach (TaskData task in quest.Tasks)
-                if (task == taskToFind)
-                {
-                    activeQuest = quest;
-                    return true;
-                }
+                if (task == targetTask)
+                    quests.Add(quest);
 
-        activeQuest = null;
-        return false;
+        questsIncludingTask = quests.ToArray();
     }
 
     private bool TryGetTaskObjectFromHit(RaycastHit hit, out TaskObject taskObject)
@@ -177,7 +176,7 @@ public class NetworkGamePlayer : NetworkBehaviour
             _activeTaskObject.SetHighlighted(true);
 
             // Instantiate TaskMenu at active task object's menu root and rotate it to facie the camera
-            _activeTaskMenu = Instantiate(taskMenuPrefab, _activeTaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
+            _activeTaskMenu = Instantiate(taskPopupPrefab, _activeTaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
             _activeTaskMenu.Initialize(_activeTaskObject);
 
             TaskMenu.OnDoTask += AddTaskWaypoint;
@@ -241,7 +240,11 @@ public class NetworkGamePlayer : NetworkBehaviour
         LineRenderer line = Instantiate(waypointPathPrefab);
         line.positionCount = pathCorners.Length;
         line.SetPositions(pathCorners);
-        line.material = placeTrap ? trapPathMat : taskPathMat;
+
+        // Set path color dependent on action
+        Color pathColor = placeTrap ? gameData.InsanityColor : gameData.TaskColor;
+        pathColor.a = line.material.color.a;
+        line.material.color = pathColor;
 
         _waypointPaths.Add(taskId, line.gameObject);
     }
@@ -263,8 +266,7 @@ public class NetworkGamePlayer : NetworkBehaviour
             _questCooldown -= Time.fixedDeltaTime;
             if (_questCooldown <= 0)
             {
-                if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData newQuest))
-                    AddQuest(newQuest);
+                AddNewQuest();
                 _questCooldown = Random.Range(gameData.NewQuestTimerRange.x, gameData.NewQuestTimerRange.y);
             }
         }
@@ -279,7 +281,7 @@ public class NetworkGamePlayer : NetworkBehaviour
 
                 RpcRemoveWaypoint(connectionToClient, waypoint.TaskId);
 
-                StartCoroutine(TryDoTask(waypoint.TaskId));
+                StartCoroutine(TryDoTaskOrTrap(waypoint.TaskId, waypoint.PlaceTrap));
             }
             else if (!_isDoingTask)
             {
@@ -292,55 +294,114 @@ public class NetworkGamePlayer : NetworkBehaviour
     [Server]
     private void CompleteTask(int taskId)
     {
-        //TODO Copleting tasks and adding their TaskPoint value
         TaskData task = gameData.GetTaskById(taskId);
-        if (TryFindQuestOfTask(task, out QuestData quest) && _activeQuestPanels.TryGetValue(quest, out QuestPanel questPanel))
-            questPanel.TryCompleteTask(task);
 
-        sync_taskPoints += 0.1f;
+        // Complete current task for all quests
+        FindQuestsIncludingTask(task, out QuestData[] questsIncludingTask);
+        foreach (QuestData quest in questsIncludingTask)
+            if (_activeQuestPanels.TryGetValue(quest, out QuestPanel questPanel))
+            {
+                questPanel.TryCompleteTask(task, out bool questCompletetd);
 
-        NetworkManagerHousework.Singleton.UpdatedPlayerTaskPoints(connectionToClient.connectionId);
-        RpcUpdateTaskPoints(sync_taskPoints);
+                if (questCompletetd)
+                {
+                    AddQuestPoints(quest.QuestPoints);
+
+                    questPanel.CompleteQuest();
+                    _activeQuests.Remove(quest);
+                    _activeQuestPanels.Remove(quest);
+                }
+            }
+    }
+
+    [Server]
+    private void AddQuestPoints(int value)
+    {
+        //TODO Give player correct amount of quest points
+        sync_questPoints += value;
+        NetworkManagerHW.Singleton.UpdatedPlayerQuestPoints(connectionToClient.connectionId);
+        RpcUpdateQuestPoints(sync_questPoints);
+    }
+
+    [Server]
+    private void AddInsanityPoints(int value)
+    {
+        //TODO Give player correct amount of insanity points
+        sync_insanityPoints += value;
+        NetworkManagerHW.Singleton.UpdatedPlayerInsanityPoints(connectionToClient.connectionId);
+        RpcUpdateInsanityPoints(sync_insanityPoints);
     }
 
     [Server]
     private void CompleteTrap(int taskId)
     {
-        gameData.GetTaskById(taskId).taskObject.ActivateTrap();
+        gameData.GetTaskById(taskId).TaskObject.ActivateTrap(connectionToClient);
+        AddInsanityPoints(gameData.PlaceTrapInsanityPoints);
     }
 
     [ClientRpc]
-    private void RpcUpdateTaskPoints(float taskPoints)
+    private void RpcUpdateQuestPoints(int questPoints)
     {
-        _taskBar?.SetTaskPoints(taskPoints);
+        _taskBar.SetQuestPoints(questPoints);
     }
 
-    private void AddQuest(QuestData quest)
+    [ClientRpc]
+    private void RpcUpdateInsanityPoints(int insanityPoints)
     {
-        _activeQuests.Add(quest);
-        QuestPanel questPanel = GameManager.Singleton.QuestMenu.AddQuest(quest);
-        _activeQuestPanels.Add(quest, questPanel);
-
-        Debug.Log("ADD QUEST");
+        GameManager.Singleton.PlayerProgressBars.SetInsanityPoints(insanityPoints);
     }
 
-    private IEnumerator TryDoTask(int taskId)
+    private void AddNewQuest()
     {
+        //TODO Insanity for too many quests
+        if (_activeQuests.Count > gameData.MaxQuestCount)
+        {
+            AddInsanityPoints(gameData.TooManyQuestsInsanityPoints);
+            return;
+        }
 
+        if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData quest))
+        {
+            _activeQuests.Add(quest);
+            QuestPanel questPanel = GameManager.Singleton.QuestMenu.AddQuest(quest);
+            _activeQuestPanels.Add(quest, questPanel);
+        }
+    }
+
+    [Server]
+    private IEnumerator TryDoTaskOrTrap(int taskId, bool placeTrap)
+    {
+        TaskData task = gameData.GetTaskById(taskId);
+
+        // if task is not needed, to not work on task
+        if (!placeTrap)
+        {
+            //TODO Also break if active tasks are already completed
+            FindQuestsIncludingTask(task, out QuestData[] questsIncludingTask);
+            if (questsIncludingTask.Length == 0)
+                yield break;
+        }
 
         _isDoingTask = true;
-        yield return new WaitForSeconds(gameData.GetTaskById(taskId).WorkingTime);
 
-        CompleteTask(taskId);
-        _isDoingTask = false;
-    }
+        // Calculate time to work on task, including any trap delays
+        float workingTime;
+        if (placeTrap) workingTime = gameData.PlaceTrapWorkingTime;
+        else
+        {
+            task.TaskObject.CheckForTrap(out float trapDelayTime);
+            workingTime = task.WorkingTime + trapDelayTime;
+        }
 
-    private IEnumerator TryPlaceTrap(int taskId)
-    {
-        _isDoingTask = true;
-        yield return new WaitForSeconds(gameData.GetTaskById(taskId).WorkingTime);
+        TaskTimeIndicator timeIndicator = Instantiate(taskTimeIndicatorPrefab, task.TaskObject.TaskMenuRoot.position, Camera.main.transform.rotation);
+        timeIndicator.InitializeTimer(workingTime, placeTrap);
 
-        CompleteTrap(taskId);
+        yield return new WaitForSeconds(workingTime);
+
+        if (placeTrap) CompleteTrap(taskId);
+        else CompleteTask(taskId);
+
+        timeIndicator.DestroyIndicator();
         _isDoingTask = false;
     }
 
@@ -363,10 +424,10 @@ public class NetworkGamePlayer : NetworkBehaviour
     {
         // stop host if is host
         if (NetworkServer.active && NetworkClient.isConnected)
-            NetworkManagerHousework.Singleton.StopHost();
+            NetworkManagerHW.Singleton.StopHost();
 
         // stop client if client-only
         if (NetworkClient.isConnected)
-            NetworkManagerHousework.Singleton.StopClient();
+            NetworkManagerHW.Singleton.StopClient();
     }
 }

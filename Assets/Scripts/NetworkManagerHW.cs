@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
 
-public class NetworkManagerHousework : NetworkManager
+public class NetworkManagerHW : NetworkManager
 {
     [Header("Lobby")]
     [SerializeField] private int minPlayers = 0;
@@ -17,15 +17,18 @@ public class NetworkManagerHousework : NetworkManager
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
     [SerializeField] private GameObject spawnSystemPrefab;
 
+    [Header("References")]
+    [SerializeField] private GameData gameData;
+
     public static event Action<NetworkConnection> OnServerReadied;
 
-    private static NetworkManagerHousework _singleton;
-    public static NetworkManagerHousework Singleton
+    private static NetworkManagerHW _singleton;
+    public static NetworkManagerHW Singleton
     {
         get
         {
             if (_singleton != null) return _singleton;
-            return _singleton = singleton as NetworkManagerHousework;
+            return _singleton = singleton as NetworkManagerHW;
         }
     }
 
@@ -37,6 +40,7 @@ public class NetworkManagerHousework : NetworkManager
     /// <summary>Dictionary of all game players, with connectionId as key</summary>
     public Dictionary<int, NetworkGamePlayer> GamePlayers { get; set; } = new Dictionary<int, NetworkGamePlayer>();
     public bool IsGameInProgress => _isGameInProgress;
+    public GameData GameData => gameData;
 
 
     public override void OnStartServer()
@@ -73,19 +77,30 @@ public class NetworkManagerHousework : NetworkManager
         Debug.Log($"The player {player.DisplayName} died!".Color("cyan"));
     }
 
-    public void UpdatedPlayerTaskPoints(int connectionId)
+    public void UpdatedPlayerQuestPoints(int connectionId)
     {
         if (GamePlayers.TryGetValue(connectionId, out var player))
         {
-            if (player.TaskPoints > 0.7f) PlayerWin(connectionId);
-
-            //TODO if (player.InsanityPoints >= 1) PlayerDied(connectionId);
-
-            float teamTaskPoints = 0;
+            // check for team win
+            float teamquestPoints = 0;
             foreach (NetworkGamePlayer p in GamePlayers.Values)
-                teamTaskPoints += p.TaskPoints;
+                teamquestPoints += p.QuestPoints;
+            if (teamquestPoints >= gameData.MaxQuestPoints * 4 * gameData.TeamWinPointPercentage)
+                TeamWin();
 
-            if (teamTaskPoints >= 0.7f * 4) TeamWin();
+            // check for player solo win
+            if (player.QuestPoints >= gameData.MaxQuestPoints)
+                PlayerWin(connectionId);
+        }
+
+    }
+
+    public void UpdatedPlayerInsanityPoints(int connectionId)
+    {
+        if (GamePlayers.TryGetValue(connectionId, out var player))
+        {
+            if (player.InsanityPoints >= gameData.MaxInsanityPoints)
+                PlayerDied(connectionId);
         }
 
     }

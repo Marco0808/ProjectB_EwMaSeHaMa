@@ -558,7 +558,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0
   lobbyPlayerPanel: {fileID: 4068068855464070178}
   displayNameText: {fileID: 4096984330776066371}
   leaderIcon: {fileID: 5810266827869856518}

@@ -12,7 +12,7 @@ public class TaskData : ScriptableObject
     [SerializeField, ShowAssetPreview] private Sprite objectSprite;
     [SerializeField, ShowAssetPreview] private Sprite icon;
 
-    public TaskObject taskObject { get; set; }
+    public TaskObject TaskObject { get; set; }
 
     public string TaskName => taskName;
     public int MaxPlayersAtTask => maxPlayersAtTask;
