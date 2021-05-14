@@ -1081,7 +1081,7 @@ MonoBehaviour:
   minPlayers: 0
   lobbyScene: Assets/Scenes/Scene_Lobby.unity
   lobbyPlayerPrefab: {fileID: 8854757344751076422, guid: 4d6b5e52439e8e94aafaa989aa0a2f74, type: 3}
-  gameScene: Assets/Scenes/Scene_GameDevMarco.unity
+  gameScene: Assets/Scenes/Scene_GameFinal.unity
   gamePlayerPrefab: {fileID: 6237668881987465340, guid: 6ceb8f8165ab7274c834066de7e432e5, type: 3}
   spawnSystemPrefab: {fileID: 9143434194214237576, guid: 3819a5333fe879142b4307b8b5b89de0, type: 3}
   gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
