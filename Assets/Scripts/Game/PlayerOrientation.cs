@@ -63,7 +63,7 @@ public class PlayerOrientation : MonoBehaviour
 
 
         //Debug.Log("++++++++++ ANIMATOR: " + animator.runtimeAnimatorController);
-        Debug.Log(moveDirection);
+        //Debug.Log(moveDirection);
         transform.localScale = myScale;
         animator.SetInteger("walkingState", walkingState); 
 

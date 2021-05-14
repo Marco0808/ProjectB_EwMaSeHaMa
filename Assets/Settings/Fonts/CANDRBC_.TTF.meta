@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 2b966486b4382d24c801f531bfef5248
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Candy Round BTN Cond
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 97162fe8886954644a300fc79c743a45, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

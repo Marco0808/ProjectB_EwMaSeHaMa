@@ -22,7 +22,7 @@ public class QuestPanel : MonoBehaviour
         titleText.text = quest.Title;
         captionText.text = quest.Caption;
         questPointsText.text = quest.QuestPoints.ToString();
-        completeInOrderIndicator.enabled = quest.CompleteTasksInOrder;
+        //completeInOrderIndicator.enabled = quest.CompleteTasksInOrder;
 
         foreach (TaskData task in quest.Tasks)
         {

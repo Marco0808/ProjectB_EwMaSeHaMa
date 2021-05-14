@@ -136,19 +136,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Transition
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
+      propertyPath: m_Interactable
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
+      propertyPath: m_TargetGraphic
+      value: 
+      objectReference: {fileID: 126484499}
+    - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Colors.m_DisabledColor.b
-      value: 0.3
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Colors.m_DisabledColor.g
-      value: 0.3
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Colors.m_DisabledColor.r
-      value: 0.3
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6537997440002778549, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -309,6 +317,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &126484499 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6891841257080532574, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
+  m_PrefabInstance: {fileID: 126484495}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &131520077
@@ -793,11 +812,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6891841257080532574, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Color.b
-      value: 0
+      value: 0.1462264
       objectReference: {fileID: 0}
     - target: {fileID: 6891841257080532574, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Color.g
-      value: 0
+      value: 0.31167346
       objectReference: {fileID: 0}
     - target: {fileID: 6891841257080532574, guid: 5f7aad1c07f553b488885101e7a62355, type: 3}
       propertyPath: m_Color.r

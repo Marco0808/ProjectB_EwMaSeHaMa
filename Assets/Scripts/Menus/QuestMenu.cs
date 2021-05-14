@@ -6,8 +6,14 @@ using TMPro;
 
 public class QuestMenu : MonoBehaviour
 {
+    [SerializeField] private Image handInterfaceImage;
     [SerializeField] private Transform questContainer;
     [SerializeField] private QuestPanel questPanelPrefab;
+
+    public void SetHandInterface(Sprite handImage)
+    {
+        handInterfaceImage.sprite = handImage;
+    }
 
     public QuestPanel AddQuest(QuestData quest)
     {

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GameData_Default
   m_EditorClassIdentifier: 
   newQuestTimerRange: {x: 20, y: 30}
-  maxQuestCount: 5
+  maxQuestCount: 4
   trapTaskDelayTime: 3
   placeTrapWorkingTime: 5
   encounterWorkingTimeMultiplier: 2

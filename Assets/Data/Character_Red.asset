@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdcf8574f1a301049b9c5858885a1a86, type: 3}
   m_Name: Character_Red
   m_EditorClassIdentifier: 
-  characterName: Omi
+  characterName: Granny
   backgroundStory: Lorem ipsum dolor sit amet consectetur adipisicing elit.
   color: {r: 1, g: 0, b: 0, a: 1}
-  portrait: {fileID: 21300000, guid: 359e6ec291e155143aef84ec299c615f, type: 3}
-  playerCharacter: {fileID: 0}
+  portrait: {fileID: 21300000, guid: 51dd4426130db734da0f89a22fd50ffb, type: 3}
+  questInterfaceHand: {fileID: 21300000, guid: a320523c3cbdd2a419896f9331d2b477, type: 3}
   playerAnimatorController: {fileID: 9100000, guid: f44d043565d36f649b20659b163969f0, type: 2}

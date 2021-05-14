@@ -82,8 +82,9 @@ public class NetworkGamePlayer : NetworkBehaviour
         _input.Game.LeftMouseButton.canceled += _ => DestroyTaskMenu();
         _input.Enable();
 
+        // initialize player UI
+        GameManager.Singleton.QuestMenu.SetHandInterface(Character.QuestInterfaceHand);
         GameManager.Singleton.SetLocalPlayerColor(gameData.GetCharacterById(sync_characterId).Color);
-
         GameManager.OnLeaveGameButtonPressed += LeaveGame;
 
         CmdEnableNavAgent();
@@ -99,7 +100,7 @@ public class NetworkGamePlayer : NetworkBehaviour
         animator.runtimeAnimatorController = Character.PlayerAnimatorController;
 
         _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailablequestPointsBar();
-        _taskBar.Initialize(Character.Color);
+        _taskBar.Initialize(Character.Color, Character.Portrait);
     }
 
     public override void OnStopClient() => _taskBar.Hide();
@@ -493,18 +494,16 @@ public class NetworkGamePlayer : NetworkBehaviour
     [Server]
     private void AddNewQuest()
     {
-        if (_activeQuests.Count > gameData.MaxQuestCount)
+        if (_activeQuests.Count < gameData.MaxQuestCount)
         {
-            AddInsanityPoints(gameData.TooManyQuestsInsanityPoints);
-            return;
+            if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData quest))
+            {
+                _activeQuests.Add(quest);
+                gameData.TryGetQuestId(quest, out int questId);
+                RpcAddQuestPanel(connectionToClient, questId);
+            }
         }
-
-        if (gameData.TryGetNewQuest(_activeQuests.ToArray(), out QuestData quest))
-        {
-            _activeQuests.Add(quest);
-            gameData.TryGetQuestId(quest, out int questId);
-            RpcAddQuestPanel(connectionToClient, questId);
-        }
+        else AddInsanityPoints(gameData.TooManyQuestsInsanityPoints);
     }
 
     [Command]

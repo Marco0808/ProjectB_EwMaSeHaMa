@@ -9,9 +9,9 @@ public class PlayerProgressBars : MonoBehaviour
 {
     [Header("Task Points")]
     [SerializeField, OnValueChanged("UpdateTaskBarSize")] private float maxTaskBarLenght = 150;
-    [SerializeField, OnValueChanged("UpdateTaskBarBackground"), Range(0.5f, 1)] private float taskPointPercentageNeeded = 0.7f;
     [SerializeField] private QuestPointsBar[] taskPointBars;
     [SerializeField] private RectTransform taskBarBackground;
+    [SerializeField] private GameData gameData;
 
     [Header("Insanity Points")]
     [SerializeField] private RectTransform insanityBarTrans;
@@ -57,7 +57,7 @@ public class PlayerProgressBars : MonoBehaviour
 
     private void UpdateTaskBarBackground()
     {
-        float maxWinningLenght = (maxTaskBarLenght * 4) * taskPointPercentageNeeded;
+        float maxWinningLenght = ((maxTaskBarLenght + 5) * 4) * gameData.TeamWinPointPercentage;
         taskBarBackground.sizeDelta = new Vector2(maxWinningLenght, taskBarBackground.sizeDelta.y);
     }
 }

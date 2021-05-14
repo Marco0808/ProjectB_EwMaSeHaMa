@@ -7,6 +7,7 @@ public class QuestPointsBar : MonoBehaviour
 {
     [SerializeField] private Image progressBar;
     [SerializeField] private Image goalIndicator;
+    [SerializeField] private Image playerHeadIcon;
 
     private float _maxLenght;
 
@@ -14,10 +15,11 @@ public class QuestPointsBar : MonoBehaviour
     public Image GoalIndicator => goalIndicator;
     public float MaxLenght { get => _maxLenght; set => _maxLenght = value; }
 
-    public void Initialize(Color barColor)
+    public void Initialize(Color barColor, Sprite playerHead)
     {
-        progressBar.color = barColor;
-        goalIndicator.color = barColor;
+        //progressBar.color = barColor;
+        //goalIndicator.color = barColor;
+        playerHeadIcon.sprite = playerHead;
 
         SetQuestPoints(0);
         gameObject.SetActive(true);
