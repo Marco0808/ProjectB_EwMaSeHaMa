@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 611dd233f0f57b946bd4d9454bca084d, type: 3}
-  m_Name: TVTask
+  m_Name: KitchenTask
   m_EditorClassIdentifier: 
-  taskName: TV
+  taskName: Kitchen
   maxPlayersAtTask: 2
   workingTime: 5
-  objectSprite: {fileID: 21300000, guid: a5d24207ff29c8946bff5a3b3da7fa82, type: 3}
-  icon: {fileID: 21300000, guid: a5d24207ff29c8946bff5a3b3da7fa82, type: 3}
+  objectSprite: {fileID: 21300000, guid: a78d634bd906cc549a39b84a557f4baa, type: 3}
+  icon: {fileID: 21300000, guid: a78d634bd906cc549a39b84a557f4baa, type: 3}

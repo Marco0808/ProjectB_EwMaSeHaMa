@@ -10,12 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
-  m_Name: TestQuest 3
+  m_Name: ExerciseQuest
   m_EditorClassIdentifier: 
-  title: Chillen
-  caption: Lorem ipsum dolor sit amet consectetur adipisicing elit.
-  questPoints: 100
+  title: Exercise
+  caption: 
+  questPoints: 75
   completeTasksInOrder: 0
   tasksToComplete:
-  - {fileID: 11400000, guid: 3664038cf56ea4a41a157b1f9f476c2b, type: 2}
-  - {fileID: 11400000, guid: eff09612227f2d54990997109f19f02a, type: 2}
+  - {fileID: 11400000, guid: 8c27967a46cf70041b11b530763ff561, type: 2}

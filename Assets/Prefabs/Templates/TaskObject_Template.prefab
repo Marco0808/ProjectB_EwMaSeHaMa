@@ -77,8 +77,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0
-  markTrappedColor: {r: 1, g: 0.76163876, b: 0.43867922, a: 0}
-  gameData: {fileID: 11400000, guid: 52774f66672005d439edfc966c111e19, type: 2}
+  markTrappedColor: {r: 1, g: 0.76163876, b: 0.43867922, a: 0.5019608}
   taskMenuRoot: {fileID: 8905827655711940427}
 --- !u!212 &5291352209783794402
 SpriteRenderer:
@@ -121,7 +120,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5b76e3aac78e0e447a583994215261c3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c372802b0ac580d4d89b72bee0e3f879, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_FlipX: 0
   m_FlipY: 0
@@ -160,7 +159,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.7066667, y: 3.4133334, z: 0.2}
+  m_Size: {x: 3.84, y: 3.84, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6224441797294791450
 GameObject:

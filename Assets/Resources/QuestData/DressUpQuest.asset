@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
-  m_Name: TestQuest4
+  m_Name: DressUpQuest
   m_EditorClassIdentifier: 
-  title: Sofa Waschen
-  caption: Lorem ipsum dolor sit amet consectetur adipisicing elit.
+  title: Dress Up
+  caption: 
   questPoints: 125
   completeTasksInOrder: 0
   tasksToComplete:
-  - {fileID: 11400000, guid: 3664038cf56ea4a41a157b1f9f476c2b, type: 2}
-  - {fileID: 11400000, guid: 8b62867cc30edd04a9653e6f37c53539, type: 2}
+  - {fileID: 11400000, guid: 1da8458d55a58734392bc057673b6bb3, type: 2}
+  - {fileID: 11400000, guid: 51ec2980936e63f428929eff1b1a5f48, type: 2}

@@ -6,6 +6,11 @@ using TMPro;
 
 public class TaskPopup : MonoBehaviour
 {
+    [SerializeField] private Color taskNormalColor;
+    [SerializeField] private Color taskHighlightedColor;
+    [SerializeField] private Color trapNormalColor;
+    [SerializeField] private Color trapHighlightedColor;
+
     [SerializeField] private TMP_Text taskNameText;
     [SerializeField] private Image trapButtonImage;
     [SerializeField] private Image taskButtonImage;
@@ -38,13 +43,13 @@ public class TaskPopup : MonoBehaviour
         if (mousePoint.y > _menuCenterPoint.y)
         {
             bool isMouseLeft = mousePoint.x < _menuCenterPoint.x;
-            SetImageAlpha(trapButtonImage, isMouseLeft ? 0.8f : 0.5f);
-            SetImageAlpha(taskButtonImage, isMouseLeft ? 0.5f : 0.8f);
+            trapButtonImage.color = isMouseLeft ? trapHighlightedColor : trapNormalColor;
+            taskButtonImage.color = isMouseLeft ? taskNormalColor : taskHighlightedColor;
         }
         else
         {
-            SetImageAlpha(trapButtonImage, 0.5f);
-            SetImageAlpha(taskButtonImage, 0.5f);
+            trapButtonImage.color = trapNormalColor;
+            taskButtonImage.color = taskNormalColor;
         }
     }
 
@@ -63,16 +68,6 @@ public class TaskPopup : MonoBehaviour
             if (mousePoint.x < _menuCenterPoint.x)
                 OnPlaceTrap?.Invoke(_taskObject);
             else OnDoTask?.Invoke(_taskObject);
-        }
-    }
-
-    public void SetImageAlpha(Image image, float alpha)
-    {
-        if (image.color.a != alpha)
-        {
-            Color color = image.color;
-            color.a = alpha;
-            image.color = color;
         }
     }
 }
