@@ -4,13 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //TODO Game manager back to GameMenu class
-public class GameManager : MonoBehaviour
+public class GameMenu : MonoBehaviour
 {
     [SerializeField] private PlayerProgressBars playerProgressBars;
     [SerializeField] private QuestMenu questMenu;
     [SerializeField] private Image localPlayerColor;
 
-    public static GameManager Singleton { get; private set; }
+    public static GameMenu Singleton { get; private set; }
 
     public static event Action OnLeaveGameButtonPressed;
 

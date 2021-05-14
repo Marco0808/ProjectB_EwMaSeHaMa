@@ -83,9 +83,9 @@ public class NetworkGamePlayer : NetworkBehaviour
         _input.Enable();
 
         // initialize player UI
-        GameManager.Singleton.QuestMenu.SetHandInterface(Character.QuestInterfaceHand);
-        GameManager.Singleton.SetLocalPlayerColor(gameData.GetCharacterById(sync_characterId).Color);
-        GameManager.OnLeaveGameButtonPressed += LeaveGame;
+        GameMenu.Singleton.QuestMenu.SetHandInterface(Character.QuestInterfaceHand);
+        GameMenu.Singleton.SetLocalPlayerColor(gameData.GetCharacterById(sync_characterId).Color);
+        GameMenu.OnLeaveGameButtonPressed += LeaveGame;
 
         CmdEnableNavAgent();
     }
@@ -99,7 +99,7 @@ public class NetworkGamePlayer : NetworkBehaviour
 
         animator.runtimeAnimatorController = Character.PlayerAnimatorController;
 
-        _taskBar = GameManager.Singleton.PlayerProgressBars.GetAvailablequestPointsBar();
+        _taskBar = GameMenu.Singleton.PlayerProgressBars.GetAvailablequestPointsBar();
         _taskBar.Initialize(Character.Color, Character.Portrait);
     }
 
@@ -518,7 +518,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     private void RpcAddQuestPanel(NetworkConnection target, int questId)
     {
         QuestData quest = gameData.GetQuestById(questId);
-        QuestPanel questPanel = GameManager.Singleton.QuestMenu.AddQuest(quest);
+        QuestPanel questPanel = GameMenu.Singleton.QuestMenu.AddQuest(quest);
         _activeQuestPanels.Add(quest, questPanel);
     }
 
@@ -592,7 +592,7 @@ public class NetworkGamePlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcUpdateInsanityPoints(int insanityPoints)
     {
-        GameManager.Singleton.PlayerProgressBars.SetInsanityPoints(insanityPoints);
+        GameMenu.Singleton.PlayerProgressBars.SetInsanityPoints(insanityPoints);
     }
     #endregion
 
