@@ -10,11 +10,14 @@ public class GameData : ScriptableObject
     [Tooltip("The time range after which a new quest come up for the player.")]
     [SerializeField] private Vector2 newQuestTimerRange = new Vector2(30f, 60f);
     [SerializeField] private int maxQuestCount = 5;
+    [Tooltip("The time added to the working time when a task was trapped.")]
     [SerializeField] private float trapTaskDelayTime = 3;
+    [Tooltip("The time it takes to place a trap.")]
     [SerializeField] private float placeTrapWorkingTime = 5;
 
     [Tooltip("Self cooperate, other conflict = x0\nSelf conflict, other cooperate = x3\nBoth conflict = x1\nBoth cooperate = x2")]
     [SerializeField] private float encounterWorkingTimeMultiplier = 2;
+    [Tooltip("The time a player has to act on an encounter.")]
     [SerializeField] private float maxEncounterDuration = 5;
     [Space]
     [SerializeField] private int placeTrapInsanityPoints = 50;
@@ -72,7 +75,7 @@ public class GameData : ScriptableObject
 
         if (questPool.Count > 0)
         {
-            newQuest = questPool[UnityEngine.Random.Range(0, questPool.Count - 1)];
+            newQuest = questPool[UnityEngine.Random.Range(0, questPool.Count)];
             return true;
         }
         else

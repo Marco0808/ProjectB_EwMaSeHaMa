@@ -49,7 +49,7 @@ public class NetworkGamePlayer : NetworkBehaviour
 
     private Coroutine _taskCoroutine;
     private QuestOverflowPanel _questOverflowPanel;
-    MovementState _movementState;
+    MovementState _movementState = MovementState.Idle;
 
     private List<QuestData> _activeQuests = new List<QuestData>();
     private Dictionary<QuestData, QuestPanel> _activeQuestPanels = new Dictionary<QuestData, QuestPanel>();
@@ -719,17 +719,22 @@ public class NetworkGamePlayer : NetworkBehaviour
         if (!_agent) return;
 
         Vector3 moveDirection = _agent.steeringTarget - _agent.transform.position;
+        Debug.DrawLine(_agent.transform.position, _agent.steeringTarget, Color.green);
 
-        // determine current state
-        MovementState newMovementState = MovementState.Idle;
+        // determine movement direction
+        MovementState newMovementState;
+        if (moveDirection.sqrMagnitude != 0)
+        {
+            // check if player is rather moving sideways than back/forth
+            if (Mathf.Abs(moveDirection.x) > Mathf.Abs(moveDirection.z))
+                newMovementState = MovementState.Side;
+            else if (moveDirection.z < 0)
+                newMovementState = MovementState.Front;
+            else newMovementState = MovementState.Back;
+        }
+        else newMovementState = MovementState.Idle;
 
-        if (moveDirection.x < 0)
-            if (moveDirection.z < moveDirection.x) newMovementState = MovementState.Front;
-            else newMovementState = MovementState.Side;
-        else if (moveDirection.x > 0)
-            if (moveDirection.z > moveDirection.x) newMovementState = MovementState.Back;
-            else newMovementState = MovementState.Side;
-
+        // set new animation state if changed
         if (newMovementState != _movementState)
         {
             _movementState = newMovementState;
