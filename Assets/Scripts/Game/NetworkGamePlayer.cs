@@ -74,7 +74,7 @@ public class NetworkGamePlayer : NetworkBehaviour
         public int TaskId { get; private set; }
         public bool PlaceTrap { get; private set; }
     }
-    public enum MovementState { Idle = 0, Side = 1, Front = 2, Back = 3 }
+    public enum MovementState { Idle = 0, Left = -1, Right = 1, Front = 2, Back = 3 }
     public enum EncounterDecision { None, Conflict, Cooperate }
 
     #region Callbacks & Setup
@@ -727,10 +727,8 @@ public class NetworkGamePlayer : NetworkBehaviour
         {
             // check if player is rather moving sideways than back/forth
             if (Mathf.Abs(moveDirection.x) > Mathf.Abs(moveDirection.z))
-                newMovementState = MovementState.Side;
-            else if (moveDirection.z < 0)
-                newMovementState = MovementState.Front;
-            else newMovementState = MovementState.Back;
+                newMovementState = moveDirection.x < 0 ? MovementState.Left : MovementState.Right;
+            else newMovementState = moveDirection.z < 0 ? MovementState.Front : MovementState.Back;
         }
         else newMovementState = MovementState.Idle;
 
@@ -738,15 +736,15 @@ public class NetworkGamePlayer : NetworkBehaviour
         if (newMovementState != _movementState)
         {
             _movementState = newMovementState;
-            ChangeAnimatorState(newMovementState, moveDirection.x < 0);
+            ChangeAnimatorState(newMovementState);
         }
     }
 
     [ClientRpc]
-    private void ChangeAnimatorState(MovementState moveDirectionState, bool flipSprite)
+    private void ChangeAnimatorState(MovementState moveDirectionState)
     {
-        spriteRenderer.flipX = flipSprite;
-        animator.SetInteger("walkingState", (int)moveDirectionState);
+        spriteRenderer.flipX = moveDirectionState == MovementState.Left;
+        animator.SetInteger("walkingState", Mathf.Abs((int)moveDirectionState));
     }
     #endregion
 
