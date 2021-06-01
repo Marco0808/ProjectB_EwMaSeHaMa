@@ -8,9 +8,10 @@ using NaughtyAttributes;
 public class PlayerProgressBars : MonoBehaviour
 {
     [Header("Task Points")]
-    [SerializeField, OnValueChanged("UpdateTaskBarSize")] private float maxTaskBarLenght = 150;
-    [SerializeField] private QuestPointsBar[] taskPointBars;
-    [SerializeField] private RectTransform taskBarBackground;
+    [SerializeField] private float maxQuestBarLenght = 150;
+    [SerializeField] private QuestPointsBar[] questPointBars;
+    [SerializeField] private RectTransform teamGoalIndicator;
+    [SerializeField] private RectTransform questBarBackground;
     [SerializeField] private GameData gameData;
 
     [Header("Insanity Points")]
@@ -22,15 +23,15 @@ public class PlayerProgressBars : MonoBehaviour
     {
         _maxInsanityBarLenght = insanityBarTrans.sizeDelta.x;
 
-        UpdateTaskBarSize();
-        foreach (QuestPointsBar taskBar in taskPointBars) taskBar.Hide();
+        InitQuestProgressBar();
+        foreach (QuestPointsBar taskBar in questPointBars) taskBar.Hide();
 
         SetInsanityPoints(0);
     }
 
     public QuestPointsBar GetAvailablequestPointsBar()
     {
-        foreach (QuestPointsBar taskBar in taskPointBars)
+        foreach (QuestPointsBar taskBar in questPointBars)
             if (!taskBar.gameObject.activeSelf)
                 return taskBar;
         return null;
@@ -42,22 +43,29 @@ public class PlayerProgressBars : MonoBehaviour
         insanityBarTrans.sizeDelta = new Vector2(_maxInsanityBarLenght * normalizedInsanityPoints, insanityBarTrans.sizeDelta.y);
     }
 
-    private void UpdateTaskBarSize()
+    public void InitTeamGoalAndBackground(int playerCount)
     {
-        foreach (QuestPointsBar bar in taskPointBars)
-        {
-            bar.MaxLenght = maxTaskBarLenght;
-            bar.ProgressBar.rectTransform.sizeDelta = new Vector2(maxTaskBarLenght, bar.ProgressBar.rectTransform.sizeDelta.y);
-            RectTransform goalTrans = bar.GoalIndicator.rectTransform;
-            goalTrans.localPosition = new Vector2(maxTaskBarLenght - goalTrans.sizeDelta.x / 2, 0);
-        }
+        // Team QuestPoint goal indicator
+        float teamGoalDistance = maxQuestBarLenght * playerCount * gameData.TeamWinPointPercentage;
+        teamGoalIndicator.anchoredPosition = new Vector2(teamGoalDistance, 0);
 
-        UpdateTaskBarBackground();
+        // Progress bar background 
+        float maxWinningLenght = maxQuestBarLenght * playerCount;
+        questBarBackground.sizeDelta = new Vector2(maxWinningLenght, questBarBackground.sizeDelta.y);
     }
 
-    private void UpdateTaskBarBackground()
+    [Button("Update Progress Bar", EButtonEnableMode.Editor)]
+    private void InitQuestProgressBar()
     {
-        float maxWinningLenght = ((maxTaskBarLenght + 5) * 4) * gameData.TeamWinPointPercentage;
-        taskBarBackground.sizeDelta = new Vector2(maxWinningLenght, taskBarBackground.sizeDelta.y);
+        // Quest progress bars
+        foreach (QuestPointsBar bar in questPointBars)
+        {
+            bar.MaxLenght = maxQuestBarLenght;
+            bar.ProgressBarTrans.sizeDelta = new Vector2(maxQuestBarLenght, bar.ProgressBarTrans.sizeDelta.y);
+            RectTransform goalTrans = bar.GoalIndicator.rectTransform;
+            goalTrans.anchoredPosition = new Vector2(maxQuestBarLenght, 0);
+        }
+
+        if (!Application.isPlaying) InitTeamGoalAndBackground(4);
     }
 }

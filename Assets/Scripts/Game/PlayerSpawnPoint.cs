@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class PlayerSpawnPoint : MonoBehaviour
 {
+    [SerializeField] CharacterData characterToSpawn;
+
     private void Awake()
     {
-        PlayerSpawnSystem.AddSpawnPoint(transform);
+        PlayerSpawnSystem.AddCharacterSpawnPoint(characterToSpawn, transform);
     }
 
     private void OnDestroy()
     {
-        PlayerSpawnSystem.RemoveSpawnPoint(transform);
+        PlayerSpawnSystem.RemoveSpawnPoint(characterToSpawn);
     }
 
     private void OnDrawGizmos()

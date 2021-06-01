@@ -7,19 +7,18 @@ public class PlayerSpawnSystem : NetworkBehaviour
 {
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab;
 
-    private static List<Transform> _spawnPoints = new List<Transform>();
+    private static Dictionary<int, Transform> _spawnPoints = new Dictionary<int, Transform>();
 
-    private int _nextIndex = 0;
-
-    public static void AddSpawnPoint(Transform transform)
+    public static void AddCharacterSpawnPoint(CharacterData character, Transform transform)
     {
-        _spawnPoints.Add(transform);
-        _spawnPoints = _spawnPoints.OrderBy(x => x.GetSiblingIndex()).ToList();
+        if (NetworkManagerHW.Singleton.GameData.TryGetCharacterId(character, out int characterId))
+            _spawnPoints.Add(characterId, transform);
     }
 
-    public static void RemoveSpawnPoint(Transform transform)
+    public static void RemoveSpawnPoint(CharacterData character)
     {
-        _spawnPoints.Remove(transform);
+        if (NetworkManagerHW.Singleton.GameData.TryGetCharacterId(character, out int characterId))
+            _spawnPoints.Remove(characterId);
     }
 
     public override void OnStartServer()
@@ -36,29 +35,24 @@ public class PlayerSpawnSystem : NetworkBehaviour
     [Server]
     public void SpawnPlayer(NetworkConnection conn)
     {
-        Transform spawnPoint = _spawnPoints.ElementAtOrDefault(_nextIndex);
-        if (spawnPoint == null)
+        if (NetworkManagerHW.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer) &&
+            _spawnPoints.TryGetValue(lobbyPlayer.CharacterId, out Transform spawnPoint))
         {
-            Debug.LogError("Missing spawn point for player " + _nextIndex);
-            return;
+            // spawn and authorize new player object
+            NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
+            gamePlayer.transform.position = spawnPoint.position;
+            gamePlayer.gameObject.name = $"{gamePlayerPrefab.name} [connId={conn.connectionId}]";
+
+            gamePlayer.SetupPlayer(lobbyPlayer.DisplayName, lobbyPlayer.CharacterId, NetworkManagerHW.Singleton.numPlayers);
+
+            // Destroy and replace connection's old player object if it still exist, otherwise add new player
+            if (conn.identity != null)
+            {
+                NetworkServer.Destroy(conn.identity.gameObject);
+                NetworkServer.ReplacePlayerForConnection(conn, gamePlayer.gameObject);
+            }
+            else NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
         }
-
-        // spawn and authorize new player object
-        NetworkGamePlayer gamePlayer = Instantiate(gamePlayerPrefab);
-        gamePlayer.transform.position = _spawnPoints[_nextIndex].position;
-        gamePlayer.gameObject.name = $"{gamePlayerPrefab.name} [connId={conn.connectionId}]";
-
-        NetworkManagerHW.Singleton.LobbyPlayers.TryGetValue(conn.connectionId, out NetworkLobbyPlayer lobbyPlayer);
-        gamePlayer.SetupPlayer(lobbyPlayer.DisplayName, lobbyPlayer.CharacterId);
-
-        // Destroy and replace connection's old player object if it still exist, otherwise add new player
-        if (conn.identity != null)
-        {
-            NetworkServer.Destroy(conn.identity.gameObject);
-            NetworkServer.ReplacePlayerForConnection(conn, gamePlayer.gameObject);
-        }
-        else NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
-
-        _nextIndex++;
+        else Debug.LogError("Missing spawn point for player " + conn.connectionId);
     }
 }

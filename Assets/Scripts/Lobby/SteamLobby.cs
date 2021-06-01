@@ -13,12 +13,10 @@ public class SteamLobby : MonoBehaviour
     private Callback<GameLobbyJoinRequested_t> _lobbyJoinRequested;
     private Callback<LobbyEnter_t> _lobbyEntered;
 
-    private NetworkManagerHW _networkManager;
+    public static CSteamID LobbyId { get; private set; }
 
     private void Start()
     {
-        _networkManager = GetComponent<NetworkManagerHW>();
-
         if (SteamManager.Initialized)
         {
             _lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
@@ -31,7 +29,7 @@ public class SteamLobby : MonoBehaviour
     {
         hostButton.interactable = false;
 
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, _networkManager.maxConnections);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, NetworkManagerHW.Singleton.maxConnections);
     }
 
     private void OnLobbyCreated(LobbyCreated_t _callback)
@@ -42,11 +40,13 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        // start to host the game and send our host address to the Steam servers, if the lobby was created successfully
-        _networkManager.StartHost();
-        SteamMatchmaking.SetLobbyData(new CSteamID(_callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());
+        LobbyId = new CSteamID(_callback.m_ulSteamIDLobby);
 
-        Debug.Log("Steam Lobby Created".Color("cyan"));
+        // start to host the game and send our host address to the Steam servers, if the lobby was created successfully
+        NetworkManagerHW.Singleton.StartHost();
+        SteamMatchmaking.SetLobbyData(LobbyId, HostAddressKey, SteamUser.GetSteamID().ToString());
+
+        Debug.Log($"Steam Lobby {LobbyId} Created".Color("cyan"));
     }
 
     private void OnLobbyJoinRequested(GameLobbyJoinRequested_t _callback)
@@ -61,8 +61,9 @@ public class SteamLobby : MonoBehaviour
         {
             string _hostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(_callback.m_ulSteamIDLobby), HostAddressKey);
 
-            _networkManager.networkAddress = _hostAddress;
-            _networkManager.StartClient();
+            LobbyId = new CSteamID(_callback.m_ulSteamIDLobby);
+            NetworkManagerHW.Singleton.networkAddress = _hostAddress;
+            NetworkManagerHW.Singleton.StartClient();
         }
     }
 }

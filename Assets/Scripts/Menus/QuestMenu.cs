@@ -9,6 +9,7 @@ public class QuestMenu : MonoBehaviour
     [SerializeField] private Image handInterfaceImage;
     [SerializeField] private Transform questContainer;
     [SerializeField] private QuestPanel questPanelPrefab;
+    [SerializeField] private QuestOverflowPanel wastedQuestPanelPrefab;
 
     public void SetHandInterface(Sprite handImage)
     {
@@ -20,5 +21,10 @@ public class QuestMenu : MonoBehaviour
         QuestPanel questPanel = Instantiate(questPanelPrefab, questContainer);
         questPanel.Initialize(quest);
         return questPanel;
+    }
+
+    public QuestOverflowPanel AddQuestOverflowPanel()
+    {
+        return Instantiate(wastedQuestPanelPrefab, questContainer);
     }
 }

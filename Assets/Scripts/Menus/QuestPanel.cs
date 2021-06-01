@@ -7,6 +7,8 @@ using TMPro;
 public class QuestPanel : MonoBehaviour
 {
     [SerializeField] private TaskIcon taskIconPrefab;
+    [SerializeField] private Animator animator;
+    [SerializeField] private AnimationClip completeCompleteAnimation;
 
     [Header("UI References")]
     [SerializeField] private TMP_Text titleText;
@@ -20,9 +22,11 @@ public class QuestPanel : MonoBehaviour
     public void Initialize(QuestData quest)
     {
         titleText.text = quest.Title;
-        captionText.text = quest.Caption;
         questPointsText.text = quest.QuestPoints.ToString();
+        //captionText.text = quest.Caption;
         //completeInOrderIndicator.enabled = quest.CompleteTasksInOrder;
+
+        animator.SetTrigger("AddQuest");
 
         foreach (TaskData task in quest.Tasks)
         {
@@ -30,11 +34,8 @@ public class QuestPanel : MonoBehaviour
             taskIcon.Initialize(task.Icon);
             _taskIcons.Add(task, new TaskInterface(taskIcon, false));
         }
-    }
 
-    public void CompleteQuest()
-    {
-        Destroy(gameObject);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(transform.parent.GetComponentInParent<RectTransform>());
     }
 
     public bool TryCompleteTask(TaskData task, out bool questCompleted)
@@ -57,6 +58,15 @@ public class QuestPanel : MonoBehaviour
         }
         questCompleted = false;
         return false;
+    }
+
+    public void CompleteQuest() => StartCoroutine(DestroyAfterComplete());
+
+    private IEnumerator DestroyAfterComplete()
+    {
+        animator.SetTrigger("CompleteQuest");
+        yield return new WaitForSeconds(completeCompleteAnimation.length);
+        Destroy(gameObject);
     }
 }
 

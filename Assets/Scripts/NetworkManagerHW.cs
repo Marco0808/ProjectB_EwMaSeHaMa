@@ -39,17 +39,20 @@ public class NetworkManagerHW : NetworkManager
 
     /// <summary>Dictionary of all game players, with connectionId as key</summary>
     public Dictionary<int, NetworkGamePlayer> GamePlayers { get; set; } = new Dictionary<int, NetworkGamePlayer>();
+
     public bool IsGameInProgress => _isGameInProgress;
     public GameData GameData => gameData;
 
-
     public override void OnStartServer()
     {
+        SetServerPaused(false);
     }
 
     public override void OnStopServer()
     {
         LobbyPlayers.Clear();
+        GamePlayers.Clear();
+        _isGameInProgress = false;
     }
 
     public override void OnStartClient()
@@ -59,22 +62,20 @@ public class NetworkManagerHW : NetworkManager
             NetworkClient.RegisterPrefab(prefab);
     }
 
+    [Server]
+    public void SetServerPaused(bool isPaused)
+    {
+        float timeScale = isPaused ? 0 : 1;
+        Time.timeScale = timeScale;
+    }
+
     #region Winning and Losing Conditions
-    public void TeamWin()
+    private void ShowEndScreen(string message, Color messageColor)
     {
-        Debug.Log("The whole team has won!".Color("cyan"));
-    }
+        SetServerPaused(true);
 
-    public void PlayerWin(int connectionId)
-    {
-        GamePlayers.TryGetValue(connectionId, out var player);
-        Debug.Log($"The player {player.DisplayName} has won!".Color("cyan"));
-    }
-
-    public void PlayerDied(int connectionId)
-    {
-        GamePlayers.TryGetValue(connectionId, out var player);
-        Debug.Log($"The player {player.DisplayName} died!".Color("cyan"));
+        foreach (var item in GamePlayers)
+            item.Value.ShowLocalEndScreen(message, messageColor);
     }
 
     public void UpdatedPlayerQuestPoints(int connectionId)
@@ -82,26 +83,42 @@ public class NetworkManagerHW : NetworkManager
         if (GamePlayers.TryGetValue(connectionId, out var player))
         {
             // check for team win
-            float teamquestPoints = 0;
+            int teamQuestPoints = 0;
             foreach (NetworkGamePlayer p in GamePlayers.Values)
-                teamquestPoints += p.QuestPoints;
-            if (teamquestPoints >= gameData.MaxQuestPoints * 4 * gameData.TeamWinPointPercentage)
-                TeamWin();
+                teamQuestPoints += p.QuestPoints;
+            if (teamQuestPoints >= gameData.MaxQuestPoints * 4 * gameData.TeamWinPointPercentage)
+            {
+                // Team Win
+                ShowEndScreen($"The whole team has won with {teamQuestPoints} Quest Points!", gameData.TaskColor);
+            }
 
             // check for player solo win
             if (player.QuestPoints >= gameData.MaxQuestPoints)
-                PlayerWin(connectionId);
+            {
+                // Player Win
+                ShowEndScreen($"{player.DisplayName} has won with {player.QuestPoints} Quest Points!", gameData.TaskColor);
+            }
         }
     }
 
     public void UpdatedPlayerInsanityPoints(int connectionId)
     {
         if (GamePlayers.TryGetValue(connectionId, out var player))
-        {
             if (player.InsanityPoints >= gameData.MaxInsanityPoints)
-                PlayerDied(connectionId);
-        }
+            {
+                // Player Died
+                ShowEndScreen($"{player.DisplayName} has died due to {player.InsanityPoints} Insanity Points!", gameData.InsanityColor);
+            }
+    }
 
+    [ContextMenu("DEBUG Add Quest and Insanity Points")]
+    private void AddQuestAndInsanityPoints()
+    {
+        foreach (var item in GamePlayers)
+        {
+            item.Value.AddQuestPoints(100);
+            item.Value.AddInsanityPoints(100);
+        }
     }
     #endregion
 

@@ -102,10 +102,7 @@ public class NetworkLobbyPlayer : NetworkBehaviour
         leaderIcon.SetActive(sync_isLeader);
 
         if (hasAuthority)
-        {
             _lobbyMenu.StartGameButton.gameObject.SetActive(sync_isLeader);
-            _lobbyMenu.PlayerInviteWindow.SetActive(sync_isLeader);
-        }
     }
 
     private void ToggleReadyState()
@@ -153,7 +150,9 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     {
         // stop host if is host
         if (NetworkServer.active && NetworkClient.isConnected)
+        {
             NetworkManagerHW.Singleton.StopHost();
+        }
 
         // stop client if client-only
         if (NetworkClient.isConnected)

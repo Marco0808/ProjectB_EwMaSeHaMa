@@ -6,7 +6,8 @@ using Mirror;
 [RequireComponent(typeof(SpriteRenderer))]
 public class TaskObject : NetworkBehaviour
 {
-    [SerializeField] private Color markTrappedColor;
+    [SerializeField, Range(0.5f, 1)] private float highlightValue = 1;
+    [SerializeField] private GameObject trapIndicatorPrefab;
     [SerializeField] private Transform taskMenuRoot;
 
     [SyncVar] private bool sync_isTrapActive;
@@ -16,6 +17,7 @@ public class TaskObject : NetworkBehaviour
     private TaskData _task;
     private SpriteRenderer _spriteRenderer;
     private Collider _collider;
+    private GameObject _trapIndicator;
 
     public TaskData Task => _task;
     public Transform TaskMenuRoot => taskMenuRoot;
@@ -100,15 +102,22 @@ public class TaskObject : NetworkBehaviour
 
     private void MarkAsTrapped(bool isTrapped)
     {
-        Color color = isTrapped ? markTrappedColor : Color.white;
-        color.a = _spriteRenderer.color.a;
-        _spriteRenderer.color = color;
+        if (isTrapped)
+        {
+            if (_trapIndicator) Destroy(_trapIndicator);
+            _trapIndicator = Instantiate(trapIndicatorPrefab, taskMenuRoot.position, Camera.main.transform.rotation);
+        }
+        else if (_trapIndicator)
+        {
+            _trapIndicator = null;
+            Destroy(_trapIndicator);
+        }
     }
     #endregion
 
     public void SetHighlighted(bool isHighlighted)
     {
-        SetSpriteBrightness(isHighlighted ? 1 : 0.5f);
+        SetSpriteBrightness(isHighlighted ? highlightValue : 0.5f);
     }
 
     /// <param name="brightness">Value between 0 and 1. Default brightness is 0.5</param>

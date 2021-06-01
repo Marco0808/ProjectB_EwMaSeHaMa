@@ -77,7 +77,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0
-  markTrappedColor: {r: 1, g: 0.76163876, b: 0.43867922, a: 0.5019608}
+  highlightValue: 0.7
+  trapIndicatorPrefab: {fileID: 7904313497987312927, guid: e2c1b1b3e26d28840a424fe4ef6e83e6, type: 3}
   taskMenuRoot: {fileID: 8905827655711940427}
 --- !u!212 &5291352209783794402
 SpriteRenderer:
@@ -185,7 +186,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6224441797294791450}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5291352209783794431}

@@ -2,35 +2,42 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
-//TODO Game manager back to GameMenu class
 public class GameMenu : MonoBehaviour
 {
     [SerializeField] private PlayerProgressBars playerProgressBars;
     [SerializeField] private QuestMenu questMenu;
-    [SerializeField] private Image localPlayerColor;
+    [Space]
+    [SerializeField] private GameObject endScreen;
+    [SerializeField] private TMP_Text endScreenText;
 
     public static GameMenu Singleton { get; private set; }
 
     public static event Action OnLeaveGameButtonPressed;
 
-    private NetworkGamePlayer[] _gamePlayers = new NetworkGamePlayer[4];
-
     public PlayerProgressBars PlayerProgressBars => playerProgressBars;
     public QuestMenu QuestMenu => questMenu;
-    public NetworkGamePlayer[] GamePlayers => _gamePlayers;
 
 
     private void Awake()
     {
         if (Singleton) Destroy(gameObject);
         else Singleton = this;
+
+        HideEndScreen();
     }
-       
-    public void SetLocalPlayerColor(Color color)
+
+    public void ShowEndScreen(string message, Color messageColor)
     {
-        color.a = 1;
-        localPlayerColor.color = color;
+        endScreen.SetActive(true);
+        endScreenText.text = message;
+        endScreenText.color = messageColor;
+    }
+
+    public void HideEndScreen()
+    {
+        endScreen.SetActive(false);
     }
 
     public void LeaveGamePressed()

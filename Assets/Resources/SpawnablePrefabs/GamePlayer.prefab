@@ -57,7 +57,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a7d7fb4cd6b2b474d938b6b966ba5935, type: 2}
+  - {fileID: 2100000, guid: adb78ff5a45630d4dbd49de216b4241b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -101,8 +101,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Display Name
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dd652faf1abf4284eae781bcd82039c5, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: a7d7fb4cd6b2b474d938b6b966ba5935, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ce253db3da4a23549910939de511e122, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: adb78ff5a45630d4dbd49de216b4241b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -126,8 +126,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 10
-  m_fontSizeBase: 10
+  m_fontSize: 7
+  m_fontSizeBase: 7
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 7697657172321421906}
   - component: {fileID: 5306336000286796602}
   m_Layer: 0
-  m_Name: Sprite
+  m_Name: CharacterSprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -241,7 +241,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1351061943
+  m_SortingLayerID: 1937827761
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 8c00a9877508f3d4389220fbdcd2f5cb, type: 3}
@@ -265,7 +265,7 @@ Animator:
   m_GameObject: {fileID: 6167873939276343012}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 37d027f94b16b07409fa906fdb767ad9, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -284,7 +284,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4930884061589815880}
   - component: {fileID: 8632881666600961889}
-  - component: {fileID: 3586732649741485605}
   - component: {fileID: 5680180484882820820}
   m_Layer: 6
   m_Name: Canvas
@@ -310,8 +309,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 4}
-  m_SizeDelta: {x: 7, y: 1.5}
+  m_AnchoredPosition: {x: 0, y: -0.5}
+  m_SizeDelta: {x: 5, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &8632881666600961889
 Canvas:
@@ -334,29 +333,6 @@ Canvas:
   m_SortingLayerID: 1351061943
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &3586732649741485605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7888517304184692365}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
 --- !u!114 &5680180484882820820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -380,7 +356,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7496532765274393879}
   - component: {fileID: 6237668881987465340}
-  - component: {fileID: -4492016267369724033}
   - component: {fileID: -4171755173673709000}
   - component: {fileID: 3791339815119572847}
   - component: {fileID: 2996558021669049828}
@@ -433,20 +408,6 @@ MonoBehaviour:
   encounterPopupPrefab: {fileID: 8286444423987445485, guid: a9590dac9a3126249a69472ddb9385ea, type: 3}
   waypointPathPrefab: {fileID: 5146185149860604163, guid: 4a1026b8dbeb8d14783540b8f6495ad4, type: 3}
   taskTimeIndicatorPrefab: {fileID: 7904313497987312926, guid: 460e8e28cb208234abcfac881b5f7dd3, type: 3}
---- !u!114 &-4492016267369724033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8382670725205969655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d29ffee9a99135040900b46cd401e71c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 5306336000286796602}
-  sprite: {fileID: 7697657172321421906}
 --- !u!195 &-4171755173673709000
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -458,7 +419,7 @@ NavMeshAgent:
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 5
-  m_Acceleration: 8
+  m_Acceleration: 15
   avoidancePriority: 50
   m_AngularSpeed: 120
   m_StoppingDistance: 0
