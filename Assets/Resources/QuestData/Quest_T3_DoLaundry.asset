@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
+  m_Name: Quest_T3_DoLaundry
+  m_EditorClassIdentifier: 
+  title: Do Laundry
+  caption: 
+  questPoints: 175
+  completeTasksInOrder: 0
+  tasksToComplete:
+  - {fileID: 11400000, guid: c1a727ee542ba4e4f9e681559cb64d78, type: 2}
+  - {fileID: 11400000, guid: 214692ef7977ae64aaa8e9b023e3a992, type: 2}
+  - {fileID: 11400000, guid: 90325ade14ff2e04a831c88026ae5677, type: 2}
+  debugTaskIconsDisplay:
+  - {fileID: 21300000, guid: 600f3195f6eb7df4ba29b1e6d778ba64, type: 3}
+  - {fileID: 21300000, guid: abe013b21405f8044b9e0f936248158d, type: 3}
+  - {fileID: 21300000, guid: c372802b0ac580d4d89b72bee0e3f879, type: 3}

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
+  m_Name: Quest_T2_Garbage
+  m_EditorClassIdentifier: 
+  title: Take out the Garbage
+  caption: 
+  questPoints: 125
+  completeTasksInOrder: 0
+  tasksToComplete:
+  - {fileID: 11400000, guid: be0f41a0ec0f1d746aaa6ad3e8e01fbf, type: 2}
+  - {fileID: 11400000, guid: cffb46803f09e5f41be811de913b6d56, type: 2}
+  debugTaskIconsDisplay:
+  - {fileID: 21300000, guid: 7900cecca59fa7e43bba11a4765a8c50, type: 3}
+  - {fileID: 21300000, guid: 49905bbe99f4e214eaafb7c3a4055dae, type: 3}

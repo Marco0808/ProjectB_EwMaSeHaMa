@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b521c9ebf0f5646b080fad58e1a443, type: 3}
   m_Name: GameData_Default
   m_EditorClassIdentifier: 
-  newQuestTimerRange: {x: 20, y: 30}
+  newQuestTimerRange: {x: 15, y: 20}
   maxQuestCount: 4
-  trapTaskDelayTime: 3
+  trapTaskDelayTime: 5
   placeTrapWorkingTime: 5
   encounterWorkingTimeMultiplier: 2
   maxEncounterDuration: 5
-  placeTrapInsanityPoints: 50
+  placeTrapInsanityPoints: 75
   tooManyQuestsInsanityPoints: 100
   maxInsanityPoints: 1000
   maxQuestPoints: 1000
-  teamWinPointPercentage: 0.7
+  teamWinPointPercentage: 0.8
   taskColor: {r: 0, g: 1, b: 1, a: 1}
   insanityColor: {r: 1, g: 0.5482237, b: 0, a: 1}
   characters:
@@ -57,10 +57,21 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b75fa2154f2782c4ab032e0791b46483, type: 2}
   - {fileID: 11400000, guid: f7138d302cbe3ec4d9c9ce15e737eb64, type: 2}
   _quests:
+  - {fileID: 11400000, guid: 114e87aa7ebfdb049ba4c095278c1e04, type: 2}
   - {fileID: 11400000, guid: 0150533b1df25f840af3e4a36d159da0, type: 2}
-  - {fileID: 11400000, guid: d715b3e3397bdb7448ed37e62295bd6e, type: 2}
-  - {fileID: 11400000, guid: 390909925bdbec543a28d7a5641cd72a, type: 2}
-  - {fileID: 11400000, guid: 885ea95f62f42dc45822b6201d4d09db, type: 2}
-  - {fileID: 11400000, guid: 61fec4af47cb77a49ba8f3f5773d2ceb, type: 2}
+  - {fileID: 11400000, guid: e763b7aaa0ee7d440a98c2034d61f955, type: 2}
   - {fileID: 11400000, guid: d6d132f888da11a4ea8ecf89fbb79084, type: 2}
+  - {fileID: 11400000, guid: 61fec4af47cb77a49ba8f3f5773d2ceb, type: 2}
+  - {fileID: 11400000, guid: f58e6fe12d58cae44abedf2a2d72b86a, type: 2}
+  - {fileID: 11400000, guid: fc6c574ecc5737e4fab1a7ad16ed30e5, type: 2}
+  - {fileID: 11400000, guid: 885ea95f62f42dc45822b6201d4d09db, type: 2}
+  - {fileID: 11400000, guid: 7da3eb4e19415a14b965a10d834d5eaa, type: 2}
+  - {fileID: 11400000, guid: f1923fe77f6f55a40b8043d049c26e45, type: 2}
   - {fileID: 11400000, guid: 9a5d9fc05547cfd479c76c03e709eb57, type: 2}
+  - {fileID: 11400000, guid: 779df4940407c3f408913d4ace42f536, type: 2}
+  - {fileID: 11400000, guid: 3da764d3378353a438f5c3832a2ba94a, type: 2}
+  - {fileID: 11400000, guid: d715b3e3397bdb7448ed37e62295bd6e, type: 2}
+  - {fileID: 11400000, guid: 57f38561d71b6cd4c980336f569fb4a7, type: 2}
+  - {fileID: 11400000, guid: 43ae87cb2af0c4a49b96db675bea3c4f, type: 2}
+  - {fileID: 11400000, guid: 390909925bdbec543a28d7a5641cd72a, type: 2}
+  - {fileID: 11400000, guid: 2f3f1f448994bc94dbe94706fe41b8ed, type: 2}

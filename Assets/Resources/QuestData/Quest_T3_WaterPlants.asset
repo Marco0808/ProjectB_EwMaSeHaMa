@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
+  m_Name: Quest_T3_WaterPlants
+  m_EditorClassIdentifier: 
+  title: Water the Plants
+  caption: 
+  questPoints: 125
+  completeTasksInOrder: 0
+  tasksToComplete:
+  - {fileID: 11400000, guid: bbb97ab840997484ab1129660c710d54, type: 2}
+  - {fileID: 11400000, guid: 94d447e28a4fa784f87e422c10ca53f6, type: 2}
+  - {fileID: 11400000, guid: 59045b4eed1c2e449a019c15804c5c1c, type: 2}
+  debugTaskIconsDisplay:
+  - {fileID: 21300000, guid: b3adcf94f5ee1fb43951671b010277b6, type: 3}
+  - {fileID: 21300000, guid: 95d32175defe72448b7c59d061379da4, type: 3}
+  - {fileID: 21300000, guid: 98a655994ff178c4e85ec9b2da645b36, type: 3}

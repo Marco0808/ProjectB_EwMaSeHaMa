@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efa455a33862b1439057e8845213e98, type: 3}
+  m_Name: Quest_T2_VisitBathroom
+  m_EditorClassIdentifier: 
+  title: Visit the Bathroom
+  caption: 
+  questPoints: 125
+  completeTasksInOrder: 0
+  tasksToComplete:
+  - {fileID: 11400000, guid: 292a45831fad0a443b2d9c2178a27b16, type: 2}
+  - {fileID: 11400000, guid: bbb97ab840997484ab1129660c710d54, type: 2}
+  debugTaskIconsDisplay:
+  - {fileID: 21300000, guid: 8651c3452fc0454439e4bfce9c639830, type: 3}
+  - {fileID: 21300000, guid: b3adcf94f5ee1fb43951671b010277b6, type: 3}
