@@ -242,7 +242,6 @@ public class NetworkGamePlayer : NetworkBehaviour
         // remove waypoint from list and client
         RpcDestroyWaypointPath(connectionToClient, waypoint.TaskId);
 
-        //TODO Encounter
         TaskData task = gameData.GetTaskById(waypoint.TaskId);
 
         if (task.TaskObject.PlayerAlreadyAssigned(connectionToClient.connectionId))
@@ -585,6 +584,7 @@ public class NetworkGamePlayer : NetworkBehaviour
             {
                 questPanel.CompleteQuest();
                 _activeQuestPanels.Remove(quest);
+                // TODO complete quests on server first
                 CmdCompleteQuest(questId);
             }
         }

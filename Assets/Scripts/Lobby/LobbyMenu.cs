@@ -69,9 +69,4 @@ public class LobbyMenu : MonoBehaviour
             Instantiate(invitableFriendPrefab, invitableFriendsContainer).Initalize(friendId);
         }
     }
-
-    public void InviteFriend()
-    {
-        //TODO
-    }
 }
